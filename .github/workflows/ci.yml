@@ -1,24 +1,15 @@
-# This is a basic workflow to help you get started with Actions
+name: Tests & Deploy
 
-name: Tests
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-
   unit-test:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
     env:
@@ -26,9 +17,7 @@ jobs:
       COVERALLS_GIT_BRANCH: "${{ github.ref }}"
       COVERALLS_SERVICE_NAME: "Github CI"
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         
       - name: Setup Node.js environment
@@ -37,7 +26,7 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Build node-red-contrib package
+      - name: Build simple-webdriver package
         run: npm run prepublishOnly
 
       - name: Launch unit testing
@@ -48,7 +37,6 @@ jobs:
          
   
   e2e-test:
-    # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -63,9 +51,7 @@ jobs:
             browser: safari #Not available
           - os: ubuntu-latest
             browser: edge #Not available
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
         
       - name: Setup Node.js environment
@@ -74,7 +60,7 @@ jobs:
       - name: Install npm dependencies
         run: npm install
 
-      - name: Build node-red-contrib package
+      - name: Build simple-webdriver package
         run: npm run prepublishOnly
 
       - name: Run chromedriver (ubuntu)

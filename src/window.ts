@@ -58,18 +58,20 @@ export class Window {
         return this.handle;
     }
 
-    public navigate =  {
-        refresh : () => {
-            return this._driver.window(this).navigate.refresh();
-        },
-        to : (url : string) => {
-            return this._driver.window(this).navigate.to(url);
-        },
-        back : () => {
-            return this._driver.window(this).navigate.back();
-        },            
-        forward : () => {
-            return this._driver.window(this).navigate.forward();
-        } 
+    public navigate = () => {
+        return {
+            refresh : () => {
+                return this._driver.window(this).navigate().refresh();
+            },
+            to : (url : string) => {
+                return this._driver.window(this).navigate().to(url);
+            },
+            back : () => {
+                return this._driver.window(this).navigate().back();
+            },            
+            forward : () => {
+                return this._driver.window(this).navigate().forward();
+            } 
+        }
     }
 }

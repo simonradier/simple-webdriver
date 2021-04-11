@@ -582,7 +582,7 @@ export class WebDriver {
                     this._timeouts = resp.body.value.capabilities.timeouts;
                     WebDriver._onGoingSessions[this._session] = {url : this.serverURL , api : this._api};
                     try {
-                        this._currentHandle = (await this.getCurrentWindow).toString();
+                        this._currentHandle = (await this.getCurrentWindow()).toString();
                     } catch (err) {
                         reject (err);
                     }

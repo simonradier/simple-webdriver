@@ -949,7 +949,7 @@ export function generateSimpleDriverTest(browser : string) {
                 nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
            });
 
-            describe ('getHandle', function () {
+            describe ('getCurrentWindow', function () {
                 it('should return the window\'s handle if the webdriver response is successful', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);

@@ -259,7 +259,7 @@ export function generateSimpleDriverTest(browser : string) {
                     await expect(driver.start()).to.be.fulfilled;
                     let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 });
 
                 it('should navigate to the website page with no error several times', async function() {
@@ -268,9 +268,9 @@ export function generateSimpleDriverTest(browser : string) {
                     await expect(driver.start()).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'first try').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP_1), 'second try').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP_2), 'third try').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'first try').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP_1), 'second try').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP_2), 'third try').to.be.fulfilled;
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
@@ -279,7 +279,7 @@ export function generateSimpleDriverTest(browser : string) {
                     await expect(driver.start()).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_TO_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.rejectedWith(/navigate/);
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.rejectedWith(/navigate/);
                 });
             });
 
@@ -294,7 +294,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_CURRENTURL.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                     await expect(driver.window().getCurrentURL()).to.become(td.WD_WEBSITE_URL_HTTP);
@@ -304,7 +304,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_CURRENTURL.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(driver.window().getCurrentURL(), 'first try').to.become(td.WD_WEBSITE_URL_HTTP);
@@ -316,7 +316,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_CURRENTURL.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/url`).twice().reply(resp.code, resp.body, resp.headers);
                     await expect(driver.window().getCurrentURL()).to.be.rejectedWith(/geturl/);
@@ -333,32 +333,32 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp3 = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/refresh`).reply(resp3.code, resp3.body, resp3.headers);
-                    await expect(driver.window().navigate.refresh()).to.be.fulfilled;
+                    await expect(driver.window().navigate().refresh()).to.be.fulfilled;
                 });
 
                 it('should refresh to the website page with no error several times', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/refresh`).thrice().reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.refresh()).to.be.fulfilled;
-                    await expect(driver.window().navigate.refresh()).to.be.fulfilled;
-                    await expect(driver.window().navigate.refresh()).to.be.fulfilled;
+                    await expect(driver.window().navigate().refresh()).to.be.fulfilled;
+                    await expect(driver.window().navigate().refresh()).to.be.fulfilled;
+                    await expect(driver.window().navigate().refresh()).to.be.fulfilled;
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_REFRESH_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/refresh`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.refresh()).to.be.rejectedWith(/refresh/);
+                    await expect(driver.window().navigate().refresh()).to.be.rejectedWith(/refresh/);
                 });
             });
 
@@ -372,32 +372,32 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/back`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.back()).to.be.fulfilled;
+                    await expect(driver.window().navigate().back()).to.be.fulfilled;
                 });
 
                 it('should refresh to go back several times', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/back`).thrice().reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.back()).to.be.fulfilled;
-                    await expect(driver.window().navigate.back()).to.be.fulfilled;
-                    await expect(driver.window().navigate.back()).to.be.fulfilled;
+                    await expect(driver.window().navigate().back()).to.be.fulfilled;
+                    await expect(driver.window().navigate().back()).to.be.fulfilled;
+                    await expect(driver.window().navigate().back()).to.be.fulfilled;
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_BACK_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/back`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.back()).to.be.rejectedWith(/back/);
+                    await expect(driver.window().navigate().back()).to.be.rejectedWith(/back/);
                 });
             });
 
@@ -411,32 +411,32 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/forward`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.forward()).to.be.fulfilled;
+                    await expect(driver.window().navigate().forward()).to.be.fulfilled;
                 });
 
                 it('should refresh to go back several times', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/forward`).thrice().reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.forward()).to.be.fulfilled;
-                    await expect(driver.window().navigate.forward()).to.be.fulfilled;
-                    await expect(driver.window().navigate.forward()).to.be.fulfilled;
+                    await expect(driver.window().navigate().forward()).to.be.fulfilled;
+                    await expect(driver.window().navigate().forward()).to.be.fulfilled;
+                    await expect(driver.window().navigate().forward()).to.be.fulfilled;
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                     await expect(driver.start()).to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                     let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/forward`).reply(resp.code, resp.body, resp.headers);
-                    await expect(driver.window().navigate.forward()).to.be.rejectedWith(/forward/);
+                    await expect(driver.window().navigate().forward()).to.be.rejectedWith(/forward/);
                 });
             });
         });
@@ -461,7 +461,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                         await expect(driver.start()).to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                         let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
                         nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
@@ -472,7 +472,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                         await expect(driver.start()).to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                         let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                         nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
@@ -485,7 +485,7 @@ export function generateSimpleDriverTest(browser : string) {
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                 await expect(driver.start()).to.be.fulfilled;
-                await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
@@ -497,7 +497,7 @@ export function generateSimpleDriverTest(browser : string) {
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                 await expect(driver.start()).to.be.fulfilled;
-                await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                 await expect(driver.findElement(Using.css, "test")).to.be.rejectedWith(/Cannot locate : test/);
@@ -507,7 +507,7 @@ export function generateSimpleDriverTest(browser : string) {
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                 await expect(driver.start()).to.be.fulfilled;
-                await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element`).times(50).reply(resp.code, resp.body, resp.headers);
                 let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
@@ -519,7 +519,7 @@ export function generateSimpleDriverTest(browser : string) {
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser],Browser[browser]);
                 await expect(driver.start()).to.be.fulfilled;
-                await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
+                await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element`).times(100).reply(resp.code, resp.body, resp.headers);
                 let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
@@ -551,7 +551,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/click`).reply(resp.code, resp.body, resp.headers);
@@ -562,7 +562,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                     //@ts-ignore
@@ -577,7 +577,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/clear`).reply(resp.code, resp.body, resp.headers);
@@ -588,7 +588,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                     //@ts-ignore
@@ -601,7 +601,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/clear`).reply(resp.code, resp.body, resp.headers);
@@ -617,7 +617,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_SENDKEYS.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/value`).reply(resp.code, resp.body, resp.headers);
@@ -628,7 +628,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_SENDKEYS.KO_NOT_FOUND;
                     //@ts-ignore
@@ -641,7 +641,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_SENDKEYS.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/value`).reply(resp.code, resp.body, resp.headers);
@@ -660,7 +660,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_GETTEXT.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/text`).reply(resp.code, resp.body, resp.headers);
@@ -671,7 +671,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_GETTEXT.KO_NOT_FOUND;
                     //@ts-ignore
@@ -686,7 +686,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETVALUE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/property/value`).reply(resp.code, resp.body, resp.headers);
@@ -697,7 +697,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETVALUE.KO_NOT_FOUND;
                     //@ts-ignore
@@ -712,7 +712,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETATTRIBUTE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/attribute/${td.WD_ATTRIBUTE_NAME}`).reply(resp.code, resp.body, resp.headers);
@@ -723,7 +723,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETATTRIBUTE.KO_NOT_FOUND;
                     //@ts-ignore
@@ -737,7 +737,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_SENDKEYS.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/${td.WD_PROPERTY_NAME}`).reply(resp.code, resp.body, resp.headers);
@@ -753,7 +753,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETPROPERTY.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/property/${td.WD_PROPERTY_NAME}`).reply(resp.code, resp.body, resp.headers);
@@ -764,7 +764,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETPROPERTY.KO_NOT_FOUND;
                     //@ts-ignore
@@ -778,7 +778,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_SENDKEYS.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/${td.WD_PROPERTY_NAME}`).reply(resp.code, resp.body, resp.headers);
@@ -794,7 +794,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETTAGNAME.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/name`).reply(resp.code, resp.body, resp.headers);
@@ -808,7 +808,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_GETTAGNAME.KO_NOT_FOUND;
                     //@ts-ignore
@@ -823,7 +823,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_GETCSSVALUE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/css/${td.WD_CSS_ATTRIBUTE_NAME}`).reply(resp.code, resp.body, resp.headers);
@@ -834,7 +834,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_GETCSSVALUE.KO_NOT_FOUND;
                     //@ts-ignore
@@ -849,7 +849,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_ISSELECTED.OK_FALSE;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/selected`).reply(resp.code, resp.body, resp.headers);
@@ -860,7 +860,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_CLICK.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/click`).reply(resp.code, resp.body, resp.headers);
@@ -874,7 +874,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "option");
                     let resp = td.WD_ELEMENT_ISSELECTED.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/selected`).reply(resp.code, resp.body, resp.headers);
@@ -885,7 +885,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_ISSELECTED.OK_FALSE;
                     //@ts-ignore
@@ -900,7 +900,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "input");
                     let resp = td.WD_ELEMENT_ISENABLED.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/enabled`).reply(resp.code, resp.body, resp.headers);
@@ -911,7 +911,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "button");
                     let resp = td.WD_ELEMENT_ISSELECTED.OK_FALSE;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/element/${td.WD_ELEMENT_ID}/enabled`).reply(resp.code, resp.body, resp.headers);
@@ -923,7 +923,7 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;
                     let element : Element = await driver.findElement(Using.tag, "h1");
                     let resp = td.WD_ELEMENT_ISENABLED.OK_FALSE;
                     //@ts-ignore
@@ -954,41 +954,41 @@ export function generateSimpleDriverTest(browser : string) {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                     let resp = td.WD_WINDOW_HANDLE_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
-                    await expect(driver.getWindowHandle()).to.be.fulfilled;
+                    await expect(driver.getCurrentWindow()).to.be.fulfilled;
                 });
 
                 it('should throw an error if the webdriver server return an error | Nock Only', async function () {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                     let resp = td.WD_WINDOW_HANDLE_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
-                    await expect(driver.getWindowHandle()).to.be.rejected;
+                    await expect(driver.getCurrentWindow()).to.be.rejected;
                 });                  
             });
-            describe ('getAllHandles', function () {
+            describe ('getAllWindows', function () {
                 it('should return the window\'s handle if the webdriver response is successful', async function() {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                     let resp = td.WD_WINDOW_HANDLES_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
-                    await expect(driver.getWindowHandles()).to.be.fulfilled;
+                    await expect(driver.getAllWindows()).to.be.fulfilled;
                 });
 
                 it('should throw an error if the webdriver server return an error | Nock Only', async function () {
                     let driver : WebDriver;
                     driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                     await expect(driver.start(), 'start').to.be.fulfilled;
-                    await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                    await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                     let resp = td.WD_WINDOW_HANDLES_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
-                    await expect(driver.getWindowHandles()).to.be.rejected;
+                    await expect(driver.getAllWindows()).to.be.rejected;
                 });  
             });
             describe ('current', function (){
@@ -997,7 +997,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_GETTITLE.OK;
                         nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().getTitle()).to.become("WD2 Test Page");
@@ -1006,7 +1006,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_GETTITLE.KO;
                         nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().getTitle()).to.be.rejected;
@@ -1018,7 +1018,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_GETSIZE.OK;
                         nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().getSize()).to.be.fulfilled;
@@ -1027,7 +1027,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_GETSIZE.KO;
                         nock(td.WD_SERVER_URL_HTTP[browser]).get(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().getSize()).to.be.rejected;
@@ -1039,7 +1039,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_SETSIZE(1280, 720).OK;
                         nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().setSize(1280, 720)).to.be.fulfilled;
@@ -1048,7 +1048,7 @@ export function generateSimpleDriverTest(browser : string) {
                         let driver : WebDriver;
                         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], Browser[browser]);
                         await expect(driver.start(), 'start').to.be.fulfilled;
-                        await expect(driver.window().navigate.to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
+                        await expect(driver.window().navigate().to(td.WD_WEBSITE_URL_HTTP), 'navigate to webpage').to.be.fulfilled;     
                         let resp = td.WD_WINDOW_SETSIZE(1280, 720).KO;
                         nock(td.WD_SERVER_URL_HTTP[browser]).post(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                         await expect(driver.window().setSize(1280, 720)).to.be.rejected;

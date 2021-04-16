@@ -13,10 +13,10 @@
   "scripts": {
     "prepublishOnly": "tsc",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov --reporter=text mocha --retry 1 -r ts-node/register/transpile-only 'test/unit/*test.ts'",
-    "test-wd-chrome": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 1 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-safari": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 1 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-edge": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 1 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-firefox": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 1 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
+    "test-wd-chrome": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
+    "test-wd-safari": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
+    "test-wd-edge": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
+    "test-wd-firefox": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {

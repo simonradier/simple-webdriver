@@ -33,6 +33,7 @@ jobs:
         run: npm run test 
 
       - name: Launch coverage update
+        if: github.ref == 'refs/heads/master'
         run: npm run coverage
          
   

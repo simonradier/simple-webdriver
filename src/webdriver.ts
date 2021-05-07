@@ -1,10 +1,11 @@
-import { Element, Window, Capabilities } from "./swd";
+import { Element, Window, Capabilities, Browser } from "./swd";
 import { HttpResponse } from "./utils/http-client";
 import { WindowRect, ElementDef, SessionDef, TimeoutsDef, WDAPIDef, ResponseDef, CookieDef, RequestDef} from "./interface"
 import * as wdapi from "./api";
 import { LocationError, WebDriverResponseError, WebDriverError } from "./error";
 import { Logger } from "./utils/logger";
 import { URL } from "url";
+import { BrowserType } from "./browser";
 
 
 export enum Using {
@@ -16,14 +17,6 @@ export enum Using {
     css = "css selector",
     tag = "tag name",
     xpath = "xpath"
-}
-
-export enum Browser {
-    Chrome = "chrome",
-    Chromium = "chromium",
-    Edge = "msedge",
-    Firefox = "firefox",
-    Safari = "safari",
 }
 
 export enum Protocol {
@@ -47,13 +40,7 @@ export class WebDriver {
 
     private _api : WDAPIDef;
 
-    private _session : string = null;
-
     private _w3c : boolean;
-
-    public get session() {
-        return this._session;
-    }
 
     private _serverURL : URL;
     public get serverURL() {
@@ -70,11 +57,6 @@ export class WebDriver {
 
     private _currentHandle : string = null;
 
-    private _browserName : Browser;
-
-    public get browserName() {
-        return this._browserName;
-    }
     /**
      * Create a SimpleWebDriver object which allows to interact with a webdriver server
      * @param serverURL The URL of the webdriver server
@@ -82,19 +64,15 @@ export class WebDriver {
      * @param protocol The type of protocol (see Protocol enum)
      */
 
-    public constructor(serverURL : string, browser : Browser = Browser.Chrome, protocol : Protocol = Protocol.W3C) {
+    public constructor(serverURL : string, protocol : Protocol = Protocol.W3C) {
         this._serverURL = new URL(serverURL);
         if (this.serverURL.protocol !== 'http:' && this.serverURL.protocol !== 'https:') {
             let err = new TypeError("Invalid Protocol: Webdriver only supports http or https");
             throw (err);
         }
-        if (!WebDriver._supportedBrowser.find(elem => {return (browser === elem)})) {
-            let err = new TypeError("Invalid Browser: unsupported browser " + browser);
-            throw (err);
-        }
+
         if (WebDriver.defaultHeadless)
             this.capabilities.headless = true;
-        this._browserName = browser;
         this._api = new wdapi[protocol]();
     }
 
@@ -102,7 +80,7 @@ export class WebDriver {
      * Retreive a Window object which represent the current top level Window
      * @returns a Window object of the current top level Window
      */
-    public async getCurrentWindow () {
+    public async getCurrentWindow (session : string) {
         return new Promise<Window> (async (resolve, reject) => {
             wdapi.call<string>(this.serverURL, this._api.WINDOW_GETHANDLE(this.session)).then( resp => {
                 let result : Window = new Window(this, resp.body.value);
@@ -543,51 +521,47 @@ export class WebDriver {
         throw new Error("Unsupported");
     }
 
-    public async start() : Promise<Window> {
-        return new Promise<Window> (async (resolve, reject) => {
+    public async start(browserType : BrowserType) : Promise<Browser> {
+        return new Promise<Browser> (async (resolve, reject) => {
             try {
-                // If session is already started
-                if (this.session){
-                    Logger.error("Webdriver session is already started")
-                    reject(new WebDriverError("Can't start Webdriver session which is already started"))
+                const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(browserType, this.capabilities.headless));
+                let error : WebDriverResponseError;
+                let session : string;
+                let timeouts : TimeoutsDef;
+                if (!resp.body.value) {
+                    error = new WebDriverResponseError(resp);
+                    error.message = "Response is empty or null"  
+                    Logger.error("Response is empty or null")                      
                 } else {
-                    const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(this._browserName, this.capabilities.headless));
-                    let error : WebDriverResponseError;
-                    if (!resp.body.value) {
+                    if (!resp.body.value.sessionId) {
                         error = new WebDriverResponseError(resp);
-                        error.message = "Response is empty or null"  
-                        Logger.error("Response is empty or null")                      
-                    } else {
-                        if (!resp.body.value.sessionId) {
-                            error = new WebDriverResponseError(resp);
-                            error.message = "Missing property sessionId"
-                            Logger.error("Missing property sessionId")
-                        } else if (!resp.body.value.capabilities) {
-                            error = new WebDriverResponseError(resp);
-                            error.message = "Missing property capabilities"
-                            Logger.error("Missing property capabilities")
-                        } else if (!resp.body.value.capabilities.timeouts) {
-                            Logger.warn("No timeouts provided by Webdriver server")
-                            resp.body.value.capabilities.timeouts = {
-                                implicit : 0,
-                                pageLoad : 3000,
-                                script : 30000
-                            }
+                        error.message = "Missing property sessionId"
+                        Logger.error("Missing property sessionId")
+                    } else if (!resp.body.value.capabilities) {
+                        error = new WebDriverResponseError(resp);
+                        error.message = "Missing property capabilities"
+                        Logger.error("Missing property capabilities")
+                    } else if (!resp.body.value.capabilities.timeouts) {
+                        Logger.warn("No timeouts provided by Webdriver server")
+                        resp.body.value.capabilities.timeouts = {
+                            implicit : 0,
+                            pageLoad : 3000,
+                            script : 30000
                         }
                     }
-                    if (error) {
-                        reject(error);
-                    }
-                    this._session = resp.body.value.sessionId;
-                    this._timeouts = resp.body.value.capabilities.timeouts;
-                    WebDriver._onGoingSessions[this._session] = {url : this.serverURL , api : this._api};
-                    try {
-                        this._currentHandle = (await this.getCurrentWindow()).toString();
-                    } catch (err) {
-                        reject (err);
-                    }
-                    resolve(new Window(this, this._currentHandle));
                 }
+                if (error) {
+                    reject(error);
+                }
+                session = resp.body.value.sessionId;
+                timeouts = resp.body.value.capabilities.timeouts;
+                WebDriver._onGoingSessions[session] = {url : this.serverURL , api : this._api};
+                try {
+                    this._currentHandle = (await this.getCurrentWindow(session)).toString();
+                } catch (err) {
+                    reject (err);
+                }
+                resolve(new Browser(session, browserType, this));
             } catch (err) {
                 reject(err);
             }

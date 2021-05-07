@@ -1,6 +1,8 @@
 import { WebDriverError } from "./error";
 import { WindowRect } from "./interface";
 import { WebDriver } from "./swd"
+import * as wdapi from "./api";
+
 
 /**
  * Represent a SWD Window
@@ -18,10 +20,20 @@ export class Window {
     public async getTitle() {
         if (!this._closed)
             throw (new WebDriverError("Can't getTitle of a closed window"))
-        return this._driver.window(this).getTitle();                 
+        return new Promise<string> (async (resolve, reject) => {
+            if (this.handle !== this._currentHandle)
+                await window.switch();
+            wdapi.call<string>(this._driver.serverURL, this._driver._api.WINDOW_GETTITLE(this.session)).then( resp => {
+                resolve(resp.body.value);
+            }).catch(err => {
+                reject(err);
+            });
+        });            
     }
 
     public async setSize(width : number, height : number) {
+        if (!this._closed)
+            throw (new WebDriverError("Can't getTitle of a closed window"))
         return this._driver.window(this).setSize(width, height);                 
     }
 

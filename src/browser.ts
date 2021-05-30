@@ -76,6 +76,8 @@ export class Browser {
      * @return all the windows objects related to the open browser
      */
     public async getAllWindows () {
+        if (this._closed)
+            throw (new WebDriverError("Can't getTitle of a closed browser"));
         return this._webdriver.browser(this).getAllWindows();
     }
 
@@ -84,8 +86,8 @@ export class Browser {
      * @returns the title of the current context
      */
     public async getTitle() {
-        if (!this._closed)
-            throw (new WebDriverError("Can't getTitle of the current context"));
+        if (this._closed)
+            throw (new WebDriverError("Can't getTitle of a closed browser"));
         return this._webdriver.browser(this).getTitle();
     }
 
@@ -95,7 +97,7 @@ export class Browser {
      */
     public async getCurrentURL() {
         if (this._closed)
-            throw (new WebDriverError("Can't getURL of the current context"));
+            throw (new WebDriverError("Can't getCurrentURL of a closed browser"));
         return this._webdriver.browser(this).getCurrentURL();
 
     }

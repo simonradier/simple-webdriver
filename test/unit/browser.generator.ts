@@ -45,10 +45,18 @@ export function generateBrowserTest(browserType : string) {
             }); 
         });
 
-        describe('getCurrentWindow', function () {
-            it('', async function() {
+        describe ('getCurrentWindow', function () {
+            it('should return the window\'s handle if the webdriver response is successful', async function() { 
+                let resp = td.WD_WINDOW_HANDLE_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getCurrentWindow()).to.be.fulfilled;
+            });
 
-            }); 
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+                let resp = td.WD_WINDOW_HANDLE_RESPONSE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getCurrentWindow()).to.be.rejected;
+            });                  
         });
 
         describe('getCurrentURL', function () {
@@ -80,10 +88,38 @@ export function generateBrowserTest(browserType : string) {
             });
         });
 
-        describe('getAllWindows', function () {
-            it('', async function() {
+        describe('getTitle', async function () {
+            beforeEach(function () {
+                // Required for .navigate
+                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+            });
 
-            }); 
+            it('should return the title of the windows if the webdriver server response is successful', async function() {  
+                let resp = td.WD_WINDOW_GETTITLE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getTitle()).to.become("WD2 Test Page");
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_WINDOW_GETTITLE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getTitle()).to.be.rejected;
+            });  
+        });
+
+        describe ('getAllWindows', function () {
+            it('should return the window\'s handle if the webdriver response is successful', async function() {  
+                let resp = td.WD_WINDOW_HANDLES_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getAllWindows()).to.be.fulfilled;
+            });
+
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () {  
+                let resp = td.WD_WINDOW_HANDLES_RESPONSE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.getAllWindows()).to.be.rejected;
+            });  
         });
 
         describe('newWindow', function () {

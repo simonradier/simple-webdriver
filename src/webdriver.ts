@@ -209,6 +209,7 @@ export class WebDriver {
                     throw (err);
                 }    
             },
+            
             executeAsync : async (script : string | Function, ...args: any[]) => {
                 try {
                     if (typeof script !== "string")

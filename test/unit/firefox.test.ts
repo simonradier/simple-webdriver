@@ -7,6 +7,6 @@ import { generateWindowTest } from "./window.generator";
 describe('Browser : Firefox', function (){
     generateWebDriverTest("Firefox");
     generateBrowserTest("Firefox");
-    generateElementTest("Safari");
-    generateWindowTest("Safari");
+    generateElementTest("Firefox");
+    generateWindowTest("Firefox");
 });

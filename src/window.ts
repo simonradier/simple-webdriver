@@ -31,7 +31,7 @@ export class Window {
     }
 
     public async setSize(width : number, height : number) {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't setSize of a closed window"));
         try {
             await this.switch();
@@ -42,7 +42,7 @@ export class Window {
     }
 
     public async getSize() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't getSize of a closed window"));
         try {
             await this.switch();
@@ -53,7 +53,7 @@ export class Window {
     }
 
     public async maximize() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't maximize of a closed window"));
         try {
             await this.switch();
@@ -64,7 +64,7 @@ export class Window {
     }
 
     public async minimize() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't minimize of a closed window"));
         try {
             await this.switch();
@@ -75,7 +75,7 @@ export class Window {
     }
 
     public async fullscreen() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't fullscreen of a closed window"))
         try {
             await this.switch();
@@ -86,7 +86,7 @@ export class Window {
     }
 
     public async switch() : Promise<void> {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't switch to a closed window"));
         try { 
             await this._webdriver.window(this).switch(); 
@@ -97,7 +97,7 @@ export class Window {
     }
 
     public async screenshot() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Can't get a screenshot of a closed window"))
         try {
             await this.switch();
@@ -108,7 +108,7 @@ export class Window {
     }
 
     public async close() {
-        if (!this._closed)
+        if (this._closed)
             throw (new WebDriverError("Window is already closed"))
         this._closed = true;
         return this._webdriver.window(this).close();                

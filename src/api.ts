@@ -2,7 +2,6 @@ import * as httpclient from "./utils/http-client";
 import { ResponseDef, RequestDef } from "./interface"
 import { Logger } from "./utils/logger";
 import { WebDriverResponseError } from "./error";
-import { URL } from "url";
 
 export async function call<T>(url : URL, request : RequestDef) {
     return new Promise<httpclient.HttpResponse<ResponseDef<T>>>(async (resolve, reject) => {

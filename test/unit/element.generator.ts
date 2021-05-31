@@ -11,9 +11,11 @@ export function generateElementTest(browserType : string) {
     describe('Element', function (){
         let g_driver : WebDriver = null;
         let g_browser : Browser = null;
-        before(function () {
+        before(async function () {
             // Deactivate WebDriver Logs
             LoggerConfiguration.logLevel = LogLevel.Trace;
+            // Clean previous sessions
+            await WebDriver.cleanSessions();
             g_driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
         });
 

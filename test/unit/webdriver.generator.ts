@@ -10,9 +10,11 @@ chai.use(chaiAsPromised);
 
 export function generateWebDriverTest(browserType : string) { 
     describe('WebDriver', function (){ 
-        before(function () {
+        before(async function () {
             // Deactivate WebDriver Logs
             LoggerConfiguration.logLevel = LogLevel.Trace;
+            // Clean previous sessions
+            await WebDriver.cleanSessions();
         });
 
 
@@ -56,7 +58,9 @@ export function generateWebDriverTest(browserType : string) {
         });
 
         describe('start', function (){
-            beforeEach(function () {
+            beforeEach(async function () {
+                // Required to manage a failure in start in case of retry. Mostly to support Firefox unstability
+                await WebDriver.cleanSessions();
                 nock.cleanAll();
             });
             it('should throw an exception if the server is not listening', async function () { 

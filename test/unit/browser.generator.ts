@@ -60,11 +60,11 @@ export function generateBrowserTest(browserType : string) {
         });
 
         describe('getCurrentURL', function () {
-            beforeEach(function () {
+            beforeEach(async function () {
                 // Required for .navigate
                 let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
-                g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
             it('should retreive the website URL with no error if result is OK', async function() {
@@ -89,11 +89,11 @@ export function generateBrowserTest(browserType : string) {
         });
 
         describe('getTitle', async function () {
-            beforeEach(function () {
+            beforeEach(async function () {
                 // Required for .navigate
                 let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
-                g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
             it('should return the title of the windows if the webdriver server response is successful', async function() {  

@@ -1,18 +1,26 @@
-import { WebDriver } from "./swd"
+import { WebDriver, Browser } from "./swd"
 
 export class Element {
+
+    public readonly browser : Browser
+    public readonly "element-6066-11e4-a52e-4f735466cecf" : string
+
+    private _driver : WebDriver;
+
+    public get session() {
+        return this.browser.session;
+    }
 
     public get ELEMENT () {
         return this["element-6066-11e4-a52e-4f735466cecf"];
     }
 
-    public constructor (driver : WebDriver, elementID : string) {
+    public constructor (elementID : string, browser : Browser, driver : WebDriver) {
         this["element-6066-11e4-a52e-4f735466cecf"] = elementID;
         this._driver = driver;
+        this.browser = browser;
     }
 
-    public readonly "element-6066-11e4-a52e-4f735466cecf" : string
-    private _driver : WebDriver;
 
     public click() : Promise<void> {
         return  this._driver.element(this).click();

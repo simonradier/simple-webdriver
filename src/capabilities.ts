@@ -4,4 +4,6 @@ export class Capabilities {
     public addArguments (arg : string) {
         this.args.push(arg);
     }
+
+    public static default = new Capabilities();
 }

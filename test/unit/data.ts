@@ -43,6 +43,10 @@ export let WD_ELEMENT_ID = "element-test-id-1337"
 
 export let WD_ELEMENT_ID_FAKE = "element-FAKE-id-1337"
 
+export let WD_WINDOW_ID = "window-test-id-1337"
+
+export let WD_WINDOW2_ID = "window-test-id-1667"
+
 export let WD_ATTRIBUTE_NAME = "value"
 
 export let WD_CSS_ATTRIBUTE_NAME = "text-align"
@@ -61,8 +65,6 @@ export let WD_ELEMENT_SEARCH = {
     tag : "h1",
     xpath : "/html/body/span"
 }
-
-export let WD_HANDLE_ID = "window-test-id-1337"
 
 export let WD_CAPABILITIES = {
     "acceptInsecureCerts": false,
@@ -356,7 +358,7 @@ export let WD_WINDOW_HANDLE_RESPONSE = {
         code : 200,
         body : {
             //@ts-ignore
-            "value" : WD_HANDLE_ID
+            "value" : WD_WINDOW_ID
         },
         headers : { "Content-Type" : "application/json"}
     },
@@ -378,7 +380,7 @@ export let WD_WINDOW_HANDLES_RESPONSE = {
         code : 200,
         body : {
             //@ts-ignore
-            "value" : [WD_HANDLE_ID , WD_HANDLE_ID]
+            "value" : [WD_WINDOW_ID , WD_WINDOW_ID]
         },
         headers : { "Content-Type" : "application/json"}
     },
@@ -747,6 +749,29 @@ export let WD_WINDOW_GETSIZE = {
         headers : { "Content-Type" : "application/json" }
     }
 }
+
+export let WD_WINDOW_SWITCH = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            "value" : WD_WINDOW2_ID
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error" : "handle", 
+                "message" : "no such window",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json" }
+    }
+}
+
 
 
 

@@ -92,17 +92,6 @@ export class Browser {
     }
 
     /**
-     * 
-     * @returns the url of the current context
-     */
-    public async getCurrentURL() {
-        if (this._closed)
-            throw (new WebDriverError("Can't getCurrentURL of a closed browser"));
-        return this._webdriver.browser(this).getCurrentURL();
-
-    }
-
-    /**
      * Open a new Window or Tab which will launch "about:blank" url
      * @param type Allow to chose if the new Window is a "Tab" type of "Window" type
      * @returns 
@@ -158,6 +147,15 @@ export class Browser {
                 if (this._closed)
                     throw (new WebDriverError("Browser session is closed."));
                 return this._webdriver.browser(this).navigate().to(url);
+            },
+            /**
+             * 
+             * @returns the url of the current context
+             */
+            getCurrentURL : async () => {
+                if (this._closed)
+                    throw (new WebDriverError("Can't getCurrentURL of a closed browser"));
+                return this._webdriver.browser(this).navigate().getCurrentURL();
             },
             back : async () => {
                 if (this._closed)

@@ -61,35 +61,6 @@ export function generateBrowserTest(browserType : string) {
             });                  
         });
 
-        describe('getCurrentURL', function () {
-            beforeEach(async function () {
-                // Required for .navigate
-                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
-                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
-                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
-            });
-
-            it('should retreive the website URL with no error if result is OK', async function() {
-                let resp = td.WD_NAVIGATE_CURRENTURL.OK;
-                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
-                await expect(g_browser.getCurrentURL()).to.become(td.WD_WEBSITE_URL_HTTP);
-            });
-
-            it('should navigate to the website page with no error several times', async function() {
-                let resp = td.WD_NAVIGATE_CURRENTURL.OK;
-                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
-                await expect(g_browser.getCurrentURL(), 'first try').to.become(td.WD_WEBSITE_URL_HTTP);
-                await expect(g_browser.getCurrentURL(), 'second try').to.become(td.WD_WEBSITE_URL_HTTP);
-                await expect(g_browser.getCurrentURL(), 'third try').to.become(td.WD_WEBSITE_URL_HTTP);
-            });
-
-            it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
-                let resp = td.WD_NAVIGATE_CURRENTURL.KO;
-                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).twice().reply(resp.code, resp.body, resp.headers);
-                await expect(g_browser.getCurrentURL()).to.be.rejectedWith(/geturl/);
-            });
-        });
-
         describe('getTitle', async function () {
             beforeEach(async function () {
                 // Required for .navigate
@@ -224,6 +195,35 @@ export function generateBrowserTest(browserType : string) {
                 });
             });
 
+
+            describe('getCurrentURL', function () {
+                beforeEach(async function () {
+                    // Required for .navigate
+                    let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                    await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+                });
+    
+                it('should retreive the website URL with no error if result is OK', async function() {
+                    let resp = td.WD_NAVIGATE_CURRENTURL.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.navigate().getCurrentURL()).to.become(td.WD_WEBSITE_URL_HTTP);
+                });
+    
+                it('should navigate to the website page with no error several times', async function() {
+                    let resp = td.WD_NAVIGATE_CURRENTURL.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.navigate().getCurrentURL(), 'first try').to.become(td.WD_WEBSITE_URL_HTTP);
+                    await expect(g_browser.navigate().getCurrentURL(), 'second try').to.become(td.WD_WEBSITE_URL_HTTP);
+                    await expect(g_browser.navigate().getCurrentURL(), 'third try').to.become(td.WD_WEBSITE_URL_HTTP);
+                });
+    
+                it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
+                    let resp = td.WD_NAVIGATE_CURRENTURL.KO;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).twice().reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.navigate().getCurrentURL()).to.be.rejectedWith(/geturl/);
+                });
+            });    
 
             describe('refresh', function () {
                 beforeEach(async function () {

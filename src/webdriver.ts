@@ -81,18 +81,6 @@ export class WebDriver {
                 });                  
             },
             /**
-             * 
-             */
-            getCurrentURL : () => {
-                return new Promise<string> (async (resolve, reject) => {
-                    wdapi.call<string>(this.serverURL, this._api.NAVIGATE_CURRENTURL(session)).then(resp => {
-                        resolve(resp.body.value);
-                    }).catch(err => {
-                        reject(err);
-                    });
-                })
-            },
-            /**
              * Retreive a Window object which represent the current top level Window
              * @returns a Window object of the current top level Window
              */
@@ -235,6 +223,18 @@ export class WebDriver {
                         return new Promise<void> (async (resolve, reject) => {
                             wdapi.call<any>(this.serverURL, this._api.NAVIGATE_TO(session, url)).then(resp => {
                                 resolve();
+                            }).catch(err => {
+                                reject(err);
+                            });
+                        })
+                    },
+                    /**
+                     * 
+                     */
+                    getCurrentURL : () => {
+                        return new Promise<string> (async (resolve, reject) => {
+                            wdapi.call<string>(this.serverURL, this._api.NAVIGATE_CURRENTURL(session)).then(resp => {
+                                resolve(resp.body.value);
                             }).catch(err => {
                                 reject(err);
                             });

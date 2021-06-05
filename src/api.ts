@@ -11,6 +11,7 @@ export async function call<T>(url : URL, request : RequestDef) {
             Logger.debug(request);
             Logger.debug(resp);
             if (resp.statusCode !== 200 || (resp.body.status && resp.body.status !== 0)) {
+                Logger.error(resp.body)
                 reject(new WebDriverResponseError(resp));
             } else {
                 resolve(resp);

@@ -60,7 +60,7 @@ export class Logger {
         }
     }
 
-    public static info (msg : string) {
+    public static info (msg : any) {
         if (LoggerConfiguration.logLevel <= LogLevel.Information) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[INFO]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
@@ -71,7 +71,7 @@ export class Logger {
         }
     }
 
-    public static warn (msg : string) {
+    public static warn (msg : any) {
         if (LoggerConfiguration.logLevel <= LogLevel.Warning) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[WARNING]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
@@ -82,7 +82,7 @@ export class Logger {
         }
     }
 
-    public static error (msg : string) {
+    public static error (msg : any) {
         if (LoggerConfiguration.logLevel <= LogLevel.Error) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[ERROR]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
@@ -93,7 +93,7 @@ export class Logger {
         }
     }
 
-    public static critical (msg : string) {
+    public static critical (msg : any) {
         if (LoggerConfiguration.logLevel <= LogLevel.Critical) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[CRITICAL]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");

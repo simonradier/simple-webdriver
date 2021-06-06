@@ -98,7 +98,9 @@ export function generateWindowTest(browserType : string) {
         });
 
         describe('minimize', function () {
-            it('should maximize the windows if the webdriver server response is successful', async function() {  
+            it('should minimize the windows if the webdriver server response is successful', async function() {  
+                if (process.platform == "linux")
+                    return;
                 let resp = td.WD_WINDOW_MINIMIZE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/minimize`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_window.minimize()).to.be.fulfilled;
@@ -116,7 +118,7 @@ export function generateWindowTest(browserType : string) {
             });   
         });
         describe('fullscreen', function () {
-            it('should maximize the windows if the webdriver server response is successful', async function() {  
+            it('should fullscreen the windows if the webdriver server response is successful', async function() {  
                 let resp = td.WD_WINDOW_FULLSCREEN.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/fullscreen`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_window.fullscreen()).to.be.fulfilled;
@@ -154,7 +156,7 @@ export function generateWindowTest(browserType : string) {
         });
 
         describe('close', function () {
-            it('should switch to the window if the webdriver server response is successful  | Nock Only', async function() {  
+            it('should close the window if the webdriver server response is successful  | Nock Only', async function() {  
                 let resp = td.WD_WINDOW_CLOSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_window.close()).to.be.fulfilled;

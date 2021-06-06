@@ -773,5 +773,58 @@ export let WD_WINDOW_SWITCH = {
 }
 
 
+export let  WD_WINDOW_MAXIMIZE = {
+        OK : {
+            code : 200,
+            body : {
+                "value" :  {
+                    "height": 1920,
+                    "width": 1080,
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            headers : { "Content-Type" : "application/json"}
+        },
+        KO : {
+            code : 500,
+            body : {
+                "value" : { 
+                    "error" : "window", 
+                    "message" : "internal server error",
+                    "stacktrace" : "this is a stack\ntrace"
+                }
+            },
+            headers : { "Content-Type" : "application/json" }
+        }
+}
+
+export let WD_WINDOW_MINIMIZE = WD_WINDOW_MAXIMIZE;
+
+export let WD_WINDOW_FULLSCREEN = WD_WINDOW_MAXIMIZE;
+
+export let  WD_WINDOW_CLOSE = {
+    OK : {
+        code : 200,
+        body : {
+            "value" : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 400,
+        body : {
+            "value" : { 
+                "error" : "window", 
+                "message" : "no such windows",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json" }
+    }
+}
+
+
+
 
 

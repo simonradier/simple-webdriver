@@ -51,6 +51,12 @@ export function generateWindowTest(browserType : string) {
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_window.getSize()).to.be.rejected;
             });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect(g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.getSize()).to.be.rejected;
+            });              
         });
 
         describe('setSize', function () {
@@ -64,23 +70,112 @@ export function generateWindowTest(browserType : string) {
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/rect`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_window.setSize(1280, 720)).to.be.rejected;
             });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.setSize(1280, 720)).to.be.rejected;
+            });  
         });
+        
         describe('maximize', function () {
-
+            it('should maximize the windows if the webdriver server response is successful', async function() {  
+                let resp = td.WD_WINDOW_MAXIMIZE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/maximize`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.maximize()).to.be.fulfilled;
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_WINDOW_MAXIMIZE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/maximize`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.maximize()).to.be.rejected;
+            });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.maximize()).to.be.rejected;
+            });  
         });
-        describe('minimize', function () {
 
+        describe('minimize', function () {
+            it('should maximize the windows if the webdriver server response is successful', async function() {  
+                let resp = td.WD_WINDOW_MINIMIZE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/minimize`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.minimize()).to.be.fulfilled;
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_WINDOW_MINIMIZE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/minimize`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.minimize()).to.be.rejected;
+            }); 
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.minimize()).to.be.rejected;
+            });   
         });
         describe('fullscreen', function () {
-
+            it('should maximize the windows if the webdriver server response is successful', async function() {  
+                let resp = td.WD_WINDOW_FULLSCREEN.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/fullscreen`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.fullscreen()).to.be.fulfilled;
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_WINDOW_FULLSCREEN.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/fullscreen`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.fullscreen()).to.be.rejected;
+            });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.fullscreen()).to.be.rejected;
+            });  
         });
         describe('switch', function () {
-
+            it('should switch to the window if the webdriver server response is successful  | Nock Only', async function() {  
+                let resp = td.WD_WINDOW_SWITCH.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.switch()).to.be.fulfilled;
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                nock.cleanAll();
+                let resp = td.WD_WINDOW_SWITCH.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.switch()).to.be.rejected;
+            });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.switch()).to.be.rejected;
+            });  
         });
-        describe('screenshot', function () {
 
+        describe('close', function () {
+            it('should switch to the window if the webdriver server response is successful  | Nock Only', async function() {  
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.close()).to.be.fulfilled;
+            });
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_window.close()).to.be.rejected;
+            });  
+            it('should throw an error if the window is closed', async function () { 
+                let resp = td.WD_WINDOW_CLOSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);   
+                await expect (g_window.close()).to.be.fulfilled;                        
+                await expect(g_window.close()).to.be.rejected;
+            });  
         });
 
-
+        describe('toString', function () {
+            it('should return the current handle of the window  | Nock Only', function() {  
+                expect(g_window.toString()).to.be.equals(td.WD_WINDOW_ID);
+            });
+        });
     });
 }

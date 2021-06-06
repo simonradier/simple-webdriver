@@ -33,83 +33,55 @@ export class Window {
     public async setSize(width : number, height : number) {
         if (this._closed)
             throw (new WebDriverError("Can't setSize of a closed window"));
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        } 
+        
+        await this.switch();
         return this._webdriver.window(this).setSize(width, height);                 
     }
 
     public async getSize() {
         if (this._closed)
             throw (new WebDriverError("Can't getSize of a closed window"));
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        }
+ 
+        await this.switch();
         return this._webdriver.window(this).getSize();                 
     }
 
     public async maximize() {
         if (this._closed)
             throw (new WebDriverError("Can't maximize of a closed window"));
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        }
+
+        await this.switch();
         return this._webdriver.window(this).maximize();                 
     }
 
     public async minimize() {
         if (this._closed)
             throw (new WebDriverError("Can't minimize of a closed window"));
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        }
+        
+        await this.switch();
         return this._webdriver.window(this).minimize();                 
     }
 
     public async fullscreen() {
         if (this._closed)
             throw (new WebDriverError("Can't fullscreen of a closed window"))
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        }
+        
+        await this.switch();
         return this._webdriver.window(this).fullscreen();                 
     }
 
     public async switch() : Promise<void> {
         if (this._closed)
             throw (new WebDriverError("Can't switch to a closed window"));
-        try { 
-            await this._webdriver.window(this).switch(); 
-            return; 
-        } catch (err) {
-            throw (err);
-        }
-    }
-
-    public async screenshot() {
-        if (this._closed)
-            throw (new WebDriverError("Can't get a screenshot of a closed window"))
-        try {
-            await this.switch();
-        } catch (err) {
-            throw (err);
-        }
-        return this._webdriver.window(this).screenshot();                 
+            
+        await this._webdriver.window(this).switch();
     }
 
     public async close() {
         if (this._closed)
             throw (new WebDriverError("Window is already closed"))
+        await this.switch();
+
         this._closed = true;
         return this._webdriver.window(this).close();                
     }

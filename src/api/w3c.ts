@@ -200,7 +200,6 @@ export class W3C implements WDAPIDef {
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/window`;
         result.requestOptions.method = "DELETE"
-        result.data = { }
         return result;
     }
 

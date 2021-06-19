@@ -393,7 +393,7 @@ export class W3C implements WDAPIDef {
     EXECUTE_ASYNC(sessionId: string, script: string, args: any[]): RequestDef {
         let result = new WebDriverRequest();
         W3C._initHttpOptions(result);
-        result.path = `session/${sessionId}/execute/qsync`;
+        result.path = `session/${sessionId}/execute/async`;
         result.requestOptions.method = "POST"
         result.data = { script, args }
         return result;

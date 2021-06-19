@@ -1,7 +1,7 @@
 import { WDAPIDef, RequestDef } from "../interface";
 import { CookieDef } from "../interface/cookie";
 
-export class JSONWire implements WDAPIDef {
+/*export class JSONWire implements WDAPIDef {
     WINDOW_CREATE(sessionId: string, type: "tab" | "window"): RequestDef {
         throw new Error("Method not implemented.");
     }
@@ -149,4 +149,4 @@ export class JSONWire implements WDAPIDef {
     ALERT_SENDTEXT(sessionId: string, text : string): RequestDef {
         throw new Error("Method not implemented.");
     }
-}
+}*/

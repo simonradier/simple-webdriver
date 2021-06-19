@@ -22,13 +22,8 @@ export class Browser {
 
 
     private _webdriver : WebDriver = null;
-    private _currentHandle : string = null;
     private _closed : boolean = false;
     
-    public get currentHandle() : string {
-        return this._currentHandle;
-    }
-
     public get closed () {
         return this._closed;
     }
@@ -45,12 +40,11 @@ export class Browser {
     }
 
     /**
-     * Close the current browser and all the related windows
-     * @returns 
+     * Close the current browser and all the related windows 
      */
     public async close() {
         if (this.closed)
-            throw (new WebDriverError("Can't close an already stopped browser"));
+            throw (new WebDriverError("Browser session is closed."));
         this._closed = true;
         return this._webdriver.browser(this).stop();
     }
@@ -60,7 +54,9 @@ export class Browser {
      * @param window 
      */
     public async switchToWindow (window : Window) {
-        window.switch();
+        if (this._closed)
+            throw (new WebDriverError("Can't getTitle of a closed browser"));
+        await window.switch();
     }
 
     /**
@@ -68,6 +64,8 @@ export class Browser {
      * @return a window which has the focus
      */
     public async getCurrentWindow () {
+        if (this._closed)
+            throw (new WebDriverError("Can't getTitle of a closed browser"));
         return this._webdriver.browser(this).getCurrentWindow();
     }
 
@@ -97,6 +95,8 @@ export class Browser {
      * @returns 
      */
     public async newWindow(type : WindowType) {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed."));
         return this._webdriver.browser(this).newWindow(type);
     }
 
@@ -108,6 +108,8 @@ export class Browser {
      * @returns 
      */
     public async findElement(using : Using, value : string, timeout : number = null) {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed."));
         return this._webdriver.browser(this).findElement(using, value, timeout);
     }
 
@@ -118,6 +120,8 @@ export class Browser {
      * @returns 
      */
     public async executeSync(script : string | Function, ...args: any[]) {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed."));
         return this._webdriver.browser(this).executeSync(script, args);
     }
 
@@ -129,6 +133,8 @@ export class Browser {
      * @returns 
      */
     public async executeAsync(script : string | Function, ...args: any[]) {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed."));
         return this._webdriver.browser(this).executeAsync(script, args);
     }
 
@@ -136,38 +142,18 @@ export class Browser {
      * 
      * @returns 
      */
-    public navigate = () => {
-        return {
-            refresh : async () => {
-                if (this._closed)
-                    throw (new WebDriverError("Browser session is closed."));
-                return this._webdriver.browser(this).navigate().refresh();
-            },
-            to : async (url : string) => {
-                if (this._closed)
-                    throw (new WebDriverError("Browser session is closed."));
-                return this._webdriver.browser(this).navigate().to(url);
-            },
-            /**
-             * 
-             * @returns the url of the current context
-             */
-            getCurrentURL : async () => {
-                if (this._closed)
-                    throw (new WebDriverError("Can't getCurrentURL of a closed browser"));
-                return this._webdriver.browser(this).navigate().getCurrentURL();
-            },
-            back : async () => {
-                if (this._closed)
-                    throw (new WebDriverError("Browser session is closed."));
-                return this._webdriver.browser(this).navigate().back();
-            },            
-            forward : async () => {
-                if (this._closed)
-                    throw (new WebDriverError("Browser session is closed."));
-                return this._webdriver.browser(this).navigate().forward();
-            } 
-        }
+    public navigate () {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed."));   
+        return this._webdriver.browser(this).navigate();
     }
 
+    /**
+     * 
+     */
+    public cookie () {
+        if (this._closed)
+            throw (new WebDriverError("Browser session is closed.")); 
+        return this._webdriver.browser(this).cookie();        
+    }
 }

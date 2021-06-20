@@ -50,16 +50,6 @@ export class Browser {
     }
 
     /**
-     * Switch to the Window provided in parameter. Same behavior as window.switch();
-     * @param window 
-     */
-    public async switchToWindow (window : Window) {
-        if (this._closed)
-            throw (new WebDriverError("Can't getTitle of a closed browser"));
-        await window.switch();
-    }
-
-    /**
      * Retreive the current broswer's windows which has the focus
      * @return a window which has the focus
      */

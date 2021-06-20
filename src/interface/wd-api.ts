@@ -10,7 +10,7 @@ export interface WDAPIDef {
     NAVIGATE_BACK(sessionId: string,): RequestDef;
     NAVIGATE_FORWARD(sessionId: string,): RequestDef;
     WINDOW_CREATE(sessionId: string, type : "tab" | "window"): RequestDef;
-    WINDOW_GETTITLE(sessionId: string): RequestDef;
+    GETTITLE(sessionId: string): RequestDef;
     WINDOW_GETHANDLE(sessionId: string): RequestDef;
     WINDOW_GETHANDLES(sessionId: string): RequestDef;
     WINDOW_SETRECT(sessionId: string, width: number, height: number): RequestDef;
@@ -20,7 +20,7 @@ export interface WDAPIDef {
     WINDOW_FULLSCREEN(sessionId: string): RequestDef;
     WINDOW_CLOSE(sessionId: string): RequestDef;
     WINDOW_SWITCH(sessionId: string, handle : string): RequestDef;
-    WINDOW_SCREENSHOT(sessionId: string): RequestDef;
+    SCREENSHOT(sessionId: string): RequestDef;
     FRAME_SWITCH(sessionId: string, frameId: string): RequestDef;
     FRAME_TOPARENT(sessionId: string): RequestDef;
     FINDELEMENT(sessionId: string, using: string, value: string): RequestDef;

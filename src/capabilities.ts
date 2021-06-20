@@ -1,4 +1,5 @@
 export class Capabilities {
+
     public headless : boolean = false;
     public args : string[] = new Array<string>();
     public addArguments (arg : string) {
@@ -6,4 +7,7 @@ export class Capabilities {
     }
 
     public static default = new Capabilities();
+    public static headless =  new Capabilities();
 }
+
+Capabilities.headless.headless = true;

@@ -118,14 +118,23 @@ export function generateWebDriverTest(browserType : string) {
                 await expect(driver.start(BrowserType[browserType], Capabilities.default)).to.be.rejectedWith(/Missing.*capabilities/);
             });
 
-            /*it('should throw an exception if the server is not a webdriver server 6/6 | Nock Only', async function () { 
+            it('should start a session even if timeouts are not supported (related to Safari) | Nock Only', async function () { 
                 let resp = td.WD_START_SESSION_RESPONSE.KO_VALUE_NO_TIMEOUTS;
                 //@ts-ignore
-                nock(td.WD_SERVER_URL_HTTP[browser]).post("/session").reply(resp.code, resp.body, resp.headers);
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post("/session").reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
-                driver = new WebDriver(td.WD_SERVER_URL_HTTP[browser], BrowserType[browser]);
-                await expect(driver.start()).to.be.rejectedWith(/Missing.*timeouts/);
-            });*/
+                let driver : WebDriver;
+                driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
+                let browser = await driver.start(BrowserType[browserType], Capabilities.default)
+                expect(browser).not.null
+                if (nock.isActive()) {
+                    expect(browser.session).to.be.equal(td.WD_SESSION_ID);
+                    expect(browser.timeouts.implicit).to.not.be.null;
+                    expect(browser.timeouts.pageLoad).to.not.be.null;
+                    expect(browser.timeouts.script).to.not.be.null;
+                    expect(nock.isDone(), 'all request were executed');
+                }
+            });
 
             it('should start a session if webdriver response is correct (http)', async function () { 
                 let resp = td.WD_START_SESSION_RESPONSE.OK;
@@ -137,6 +146,26 @@ export function generateWebDriverTest(browserType : string) {
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
                 let browser = await driver.start(BrowserType[browserType], Capabilities.default)
+                expect(browser).not.null
+                if (nock.isActive()) {
+                    expect(browser.session).to.be.equal(td.WD_SESSION_ID);
+                    expect(browser.timeouts.implicit).to.not.be.null;
+                    expect(browser.timeouts.pageLoad).to.not.be.null;
+                    expect(browser.timeouts.script).to.not.be.null;
+                    expect(nock.isDone(), 'all request were executed');
+                }
+            });
+
+            it('should start a session if webdriver response is correct (http/headless)', async function () { 
+                let resp = td.WD_START_SESSION_RESPONSE.OK;
+                //@ts-ignore
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post("/session").reply(resp.code, resp.body, resp.headers);
+                let resp2 = td.WD_WINDOW_HANDLE_RESPONSE.OK;
+                //@ts-ignore
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp2.code, resp2.body, resp2.headers);
+                let driver : WebDriver;
+                driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
+                let browser = await driver.start(BrowserType[browserType], Capabilities.headless)
                 expect(browser).not.null
                 if (nock.isActive()) {
                     expect(browser.session).to.be.equal(td.WD_SESSION_ID);

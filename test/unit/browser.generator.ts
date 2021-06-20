@@ -3,6 +3,7 @@ import nock from "nock";
 import { Browser, BrowserType } from "../../src/browser";
 import { LoggerConfiguration, LogLevel } from "../../src/utils/logger";
 import { Using, WebDriver } from "../../src/webdriver";
+import { WindowType } from "../../src/window";
 import * as td from './data';
 
 
@@ -36,15 +37,24 @@ export function generateBrowserTest(browserType : string) {
         });
 
         describe('close', function () {
-            it('', async function() {
-
+            it('should close the browser and the associated windows if the webdriver response is successful', async function() {
+                let resp = td.WD_STOP_SESSION_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.close()).to.be.fulfilled;
+                expect(g_browser.closed).to.be.true;
             }); 
-        });
 
-        describe('setCurrentWindow', function () {
-            it('', async function() {
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+                let resp = td.WD_STOP_SESSION_RESPONSE.KO_ERROR;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.close()).to.be.rejected;
+            });    
 
-            }); 
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.close()).to.be.rejectedWith(/closed/);
+            });
         });
 
         describe ('getCurrentWindow', function () {
@@ -58,7 +68,13 @@ export function generateBrowserTest(browserType : string) {
                 let resp = td.WD_WINDOW_HANDLE_RESPONSE.KO;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getCurrentWindow()).to.be.rejected;
-            });                  
+            });    
+            
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.getCurrentWindow()).to.be.rejectedWith(/closed/);;
+            });
         });
 
         describe('getTitle', async function () {
@@ -79,6 +95,12 @@ export function generateBrowserTest(browserType : string) {
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getTitle()).to.be.rejected;
             });  
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.getTitle()).to.be.rejectedWith(/closed/);;
+            });
         });
 
         describe ('getAllWindows', function () {
@@ -93,12 +115,38 @@ export function generateBrowserTest(browserType : string) {
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getAllWindows()).to.be.rejected;
             });  
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.getAllWindows()).to.be.rejectedWith(/closed/);;
+            });
         });
 
         describe('newWindow', function () {
-            it('', async function() {
+            it('should open a new window  if the webdriver response is successful (new Window)', async function() {  
+                let resp = td.WD_WINDOW_OPEN.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.newWindow(WindowType.Window)).to.be.fulfilled;
+            });
 
-            }); 
+            it('should open a new window  if the webdriver response is successful (new Window)', async function() {  
+                let resp = td.WD_WINDOW_OPEN.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.newWindow(WindowType.Tab)).to.be.fulfilled;
+            });
+
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () {  
+                let resp = td.WD_WINDOW_OPEN.KO;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.newWindow(WindowType.Tab)).to.be.rejected;
+            });  
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.newWindow(WindowType.Tab)).to.be.rejectedWith(/closed/);
+            });
         });
 
         describe('findElement', function () {
@@ -156,18 +204,94 @@ export function generateBrowserTest(browserType : string) {
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp2.code, resp2.body, resp2.headers);
                 await expect(g_browser.findElement(Using.css, ".class_dont_exist", 50)).to.be.rejectedWith(/Cannot locate :/);
             });
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.findElement(Using.css, ".class_1234", 3000)).to.be.rejected;
+            });
         });
 
         describe('executeSync', function () {
-            it('', async function() {
-
+            it('should execute the function and return the correct value if webdriver response is successful (1)', async function() {
+                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_STRING;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeSync(() => { return "hello"; })).to.be.fulfilled;
+                let val = await g_browser.executeSync(() => { return "hello"; });
+                expect(val).to.be.equal("hello");
             }); 
+
+            it('should execute the function and return the correct value if webdriver response is successful (2)', async function() {
+                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_NUMBER;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeSync(() => { return 10; })).to.be.fulfilled;
+                let val = await g_browser.executeSync(() => { return 10 });
+                expect(val).to.be.equal(10);                
+            }); 
+
+            it('should execute the function and return the correct value if webdriver response is successful (3)', async function() {
+                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ARRAY;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeSync(() => { return [1,2,3]; })).to.be.fulfilled;
+                let val = await g_browser.executeSync(() => { return [1,2,3] });
+                expect(val.length).to.be.equal(3);              
+            }); 
+
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_EXECUTE_SYNC_RESPONSE.KO_ERROR;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.executeSync("return 0")).to.be.rejected;
+            });  
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.executeSync("return 0")).to.be.rejectedWith(/closed/);
+            });
         });
 
         describe('executeAsync', function () {
-            it('', async function() {
-
+            it('should execute the function and return the correct value if webdriver response is successful (1)', async function() {
+                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_STRING;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeAsync((done) => { done("hello"); })).to.be.fulfilled;
+                let val = await g_browser.executeAsync((done) => { done("hello"); });
+                expect(val).to.be.equal("hello");
             }); 
+
+            it('should execute the function and return the correct value if webdriver response is successful (2)', async function() {
+                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_NUMBER;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeAsync((done) => { done(10); })).to.be.fulfilled;
+                let val = await g_browser.executeAsync((done) => { done(10); });
+                expect(val).to.be.equal(10);                
+            }); 
+
+            it('should execute the function and return the correct value if webdriver response is successful (3)', async function() {
+                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_ARRAY;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(g_browser.executeAsync((done) => { done([1,2,3]); })).to.be.fulfilled;
+                let val = await g_browser.executeAsync((done) => { done([1,2,3]); });
+                expect(val.length).to.be.equal(3);              
+            }); 
+
+            it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
+                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.KO_ERROR;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/execute/async`).reply(resp.code, resp.body, resp.headers);                          
+                await expect(g_browser.executeAsync("return 0")).to.be.rejected;
+            });  
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(g_browser.executeAsync("return 0")).to.be.rejectedWith(/closed/);
+            });
         });
 
         describe('navigate', function() {
@@ -192,6 +316,12 @@ export function generateBrowserTest(browserType : string) {
                     let resp = td.WD_NAVIGATE_TO_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.rejectedWith(/navigate/);
+                });
+    
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP)}).to.throw(/closed/);
                 });
             });
 
@@ -223,6 +353,12 @@ export function generateBrowserTest(browserType : string) {
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).twice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().getCurrentURL()).to.be.rejectedWith(/geturl/);
                 });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().getCurrentURL()}).to.throw(/closed/);
+                });
             });    
 
             describe('refresh', function () {
@@ -251,6 +387,12 @@ export function generateBrowserTest(browserType : string) {
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/refresh`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().refresh()).to.be.rejectedWith(/refresh/);
                 });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().refresh()}).to.throw(/closed/);;
+                });
             });
 
             describe('back', function () {
@@ -274,10 +416,16 @@ export function generateBrowserTest(browserType : string) {
                     await expect(g_browser.navigate().back()).to.be.fulfilled;
                 });
 
-                it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
+                it('should throw an error if the webdriver server return an error | Nock Only', async function() {
                     let resp = td.WD_NAVIGATE_BACK_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/back`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().back()).to.be.rejectedWith(/back/);
+                });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().back()}).to.throw(/closed/);
                 });
             });
 
@@ -306,6 +454,12 @@ export function generateBrowserTest(browserType : string) {
                     let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/forward`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().forward()).to.be.rejectedWith(/forward/);
+                });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().forward()}).to.throw(/closed/);
                 });
             });        
         });

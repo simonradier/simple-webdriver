@@ -217,6 +217,27 @@ export let WD_FIND_ELEMENT_RESPONSE = {
 }
 
 export let WD_EXECUTE_SYNC_RESPONSE = {
+    OK_NUMBER : {
+        code : 200,
+        body : {
+            "value" : 10
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_STRING : {
+        code : 200,
+        body : {
+            "value" : "hello"
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_ARRAY : {
+        code : 200,
+        body : {
+            "value" : [1, 2, 3]
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
     OK_ELEMENT : {
         code : 200,
         body : {
@@ -225,8 +246,21 @@ export let WD_EXECUTE_SYNC_RESPONSE = {
             }
         },
         headers : { "Content-Type" : "application/json"}
+    },
+    KO_ERROR : {
+        code : 500,
+        body : {
+            "value" : { 
+                "error" : "element", 
+                "message" : "this is an unknown error",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
     }
 }
+
+export let WD_EXECUTE_ASYNC_RESPONSE = WD_EXECUTE_SYNC_RESPONSE;
 
 export let WD_NAVIGATE_TO_RESPONSE = {
     OK : {
@@ -381,6 +415,28 @@ export let WD_WINDOW_HANDLES_RESPONSE = {
         body : {
             //@ts-ignore
             "value" : [WD_WINDOW_ID , WD_WINDOW_ID]
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 500,
+        body : {
+            "value" : { 
+                "error" : "handle", 
+                "message" : "internal server error",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json" }
+    }
+}
+
+export let WD_WINDOW_OPEN = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            "value" : WD_WINDOW2_ID
         },
         headers : { "Content-Type" : "application/json"}
     },

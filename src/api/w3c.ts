@@ -1,5 +1,6 @@
 import { WDAPIDef, RequestDef } from "../interface";
 import { CookieDef } from "../interface/cookie";
+import { Logger } from "../utils/logger";
 import { WebDriverRequest } from "./webdriver-request";
 
 export class W3C implements WDAPIDef {
@@ -25,8 +26,6 @@ export class W3C implements WDAPIDef {
         let browserOptions = "browserOptions";
         switch (browser) {
             case "chrome":
-                browserOptions = "goog:chromeOptions";
-            break
             case "chromium":
                 browserOptions = "goog:chromeOptions";
             break
@@ -50,6 +49,8 @@ export class W3C implements WDAPIDef {
                 case "firefox" :
                     result.data.capabilities.alwaysMatch[browserOptions].args.push("-headless");
                 break
+                default: 
+                    Logger.warn("headless feature is not supported by : " + browser)
             }
         }
         //result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
@@ -111,7 +112,7 @@ export class W3C implements WDAPIDef {
         return result;
     }
 
-    WINDOW_GETTITLE(sessionId: string): RequestDef {
+    GETTITLE(sessionId: string): RequestDef {
         let result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/title`;
@@ -212,7 +213,7 @@ export class W3C implements WDAPIDef {
         return result;
     }
 
-    WINDOW_SCREENSHOT(sessionId: string): RequestDef {
+    SCREENSHOT(sessionId: string): RequestDef {
         let result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/screenshot`;

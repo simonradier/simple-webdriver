@@ -1,4 +1,5 @@
 import { WebDriver, Browser } from "./swd"
+import { Using } from "./webdriver";
 
 export class Element {
 
@@ -66,6 +67,22 @@ export class Element {
 
     public isEnabled() : Promise<boolean> {
         return this._driver.element(this).isEnabled();
+    }
+
+    /**
+     * Take of screenshot of the selected element
+     * @returns a base 64 string of the element screenshot
+     */
+    public screenshot() : Promise<string> {
+        return this._driver.element(this).screenshot();
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    public findElement(using : Using, value : string, timeout : number) : Promise<Element> {
+        return this._driver.element(this).findElement(using, value, timeout);
     }
 
     public toString() {

@@ -1,3 +1,4 @@
+import { Element } from ".";
 import { WebDriverError } from "./error";
 import { TimeoutsDef } from "./interface/timeouts";
 import { Capabilities, Using, WebDriver, Window } from "./swd";
@@ -97,11 +98,24 @@ export class Browser {
      * @param timeout 
      * @returns 
      */
-    public async findElement(using : Using, value : string, timeout : number = null) {
+    public async findElement(using : Using, value : string, timeout : number = null) : Promise<Element> {
         if (this._closed)
             throw (new WebDriverError("Browser session is closed."));
-        return this._webdriver.browser(this).findElement(using, value, timeout);
+        return <Promise<Element>>  this._webdriver.browser(this).findElement(using, value, timeout);
     }
+
+    /**
+    * 
+    * @param using 
+    * @param value 
+    * @param timeout 
+    * @returns 
+    */
+   public async findElements(using : Using, value : string, timeout : number = null) : Promise<Element[]> {
+       if (this._closed)
+           throw (new WebDriverError("Browser session is closed."));
+       return <Promise<Element[]>> this._webdriver.browser(this).findElement(using, value, timeout, true);
+   }
 
     /**
      * 

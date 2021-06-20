@@ -48,6 +48,36 @@ export class WebDriver {
         return this._serverURL;
     }
 
+    private findElementRequest(session : string, using : Using, value : string, multiple : boolean, element? : Element) {
+        // findElement vs FindElement in element
+        const elementOrDocument = (element) ? "arguments[0]" : "document" ;
+        const argNumber =  (element) ? 1 : 0;
+        const elementId = (element) ? element.toString() : null;
+    
+        let script : string = "";
+        let request : RequestDef;
+    
+        switch (using) {
+            case Using.id :
+                script = (multiple) ? `return [ document.getElementById(arguments[0]) ];` : `return document.getElementById(arguments[0]);`;
+            case Using.className :
+            case Using.name  :
+                script = (script !== "") ? script : `return ${elementOrDocument}.getElementsBy` + using.charAt(0).toUpperCase() + using.slice(1) + `(arguments[${argNumber}])` + ((multiple) ? "" : "[0]")
+                if (element)
+                    request = this._api.EXECUTE_SYNC(session, script, [ element , value ]);
+                else 
+                    request = this._api.EXECUTE_SYNC(session, script, [ value ]);
+            break;
+            default:
+                if (element)
+                    request = (multiple) ? this._api.ELEMENT_FINDELEMENT(session, elementId, using, value) : this._api.ELEMENT_FINDELEMENTS(session, elementId, using, value);
+                else
+                    request = (multiple) ? this._api.FINDELEMENT(session, using, value) : this._api.FINDELEMENTS(session, using, value);               
+            break;
+        }
+        return request;
+    }
+
     /**
      * Create a SimpleWebDriver object which allows to interact with a webdriver server
      * @param serverURL The URL of the webdriver server
@@ -120,34 +150,23 @@ export class WebDriver {
                     delete WebDriver._onGoingSessions[browser.session];
                 }
             },
-            findElement : async (using : Using, value : string, timeout : number = null) => {
+            findElement : async (using : Using, value : string, timeout : number = null, multiple : boolean = false, fromElement : Element = null) => {
                 let timer = true;
                 if (!timeout)
                     timeout = browser.timeouts.implicit;
-                let resp : HttpResponse<ResponseDef<ElementDef>>;
+                let resp : HttpResponse<ResponseDef<ElementDef | ElementDef[]>>;
                 let script = "";
                 let request : RequestDef;
                 let error : WebDriverResponseError;
 
                 // Calculate the best type of request depending of the type of lookup
-                switch (using) {
-                    case Using.id :
-                        script = "return document.getElementById(arguments[0]);"
-                    case Using.className :
-                    case Using.name  :
-                        script = (script !== "") ? script : "return document.getElementsBy" + using.charAt(0).toUpperCase() + using.slice(1) + "(arguments[0])[0];"
-                        request = this._api.EXECUTE_SYNC(session, script, [ value ]);
-                    break;
-                    default:
-                        request = this._api.FINDELEMENT(session, using, value);
-                    break;
-                }
+                request = this.findElementRequest(session, using, value, multiple, fromElement)
 
                 // Loop until the timeout callback is resolved or if the lookup succeded
                 setTimeout(() => timer = false, timeout);
                 do {
                     try {
-                        resp = await wdapi.call<ElementDef>(this.serverURL, request);
+                        resp = await wdapi.call<ElementDef | ElementDef[]>(this.serverURL, request);
                     } catch (err) {
                         error = err;
                         resp = err.httpResponse;
@@ -156,8 +175,12 @@ export class WebDriver {
                 } while (resp && (resp.body.value === null || resp.statusCode !== 200 ) && timer)
 
                 if (resp && resp.statusCode === 200 && resp.body.value) { // If the look up succeded
-                    const element = new Element(resp.body.value[Object.keys(resp.body.value)[0]], browser, this)
-                    return element;
+                let result : Element | Element[];
+                    if (Array.isArray(resp.body.value))
+                        result = resp.body.value.map((elem) => { return new Element(elem["element-6066-11e4-a52e-4f735466cecf"], browser, this)});
+                    else
+                        result = new Element(resp.body.value["element-6066-11e4-a52e-4f735466cecf"], browser, this)
+                    return result;
                 } else { // if the lookup failed
                     if (resp && resp.statusCode === 404)
                         throw (new LocationError(using, value, timeout));
@@ -318,7 +341,17 @@ export class WebDriver {
             isEnabled : async () => {
                 let resp = await wdapi.call<boolean>(this.serverURL, this._api.ELEMENT_ISENABLED(session, elementId));
                 return resp.body.value;
-            }
+            },
+            screenshot : async () => {
+                let resp = await wdapi.call<string>(this.serverURL, this._api.ELEMENT_SCREENSHOT(session, elementId));
+                return resp.body.value;
+            },
+            findElement : async (using : Using, value : string, timeout : number = null) => {
+                return <Promise<Element>> this.browser(element.browser).findElement(using, value, timeout, false, element);              
+            },
+            findElements : async (using : Using, value : string, timeout : number = null) => {
+                return <Promise<Element[]>> this.browser(element.browser).findElement(using, value, timeout, true, element);              
+            },
         }
     }
 

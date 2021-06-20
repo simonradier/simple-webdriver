@@ -168,14 +168,14 @@ export class WebDriver {
             executeSync : async (script : string | Function, ...args: any[]) => {
                 if (typeof script !== "string")
                     script = 'return (' + script + ').apply(null, arguments);';
-                let resp = await wdapi.call<any>(this.serverURL, this._api.EXECUTE_SYNC(session, script, args));
+                let resp = await wdapi.call<any>(this.serverURL, this._api.EXECUTE_SYNC(session, script, ...args));
                 return resp.body.value; 
             },
             
             executeAsync : async (script : string | Function, ...args: any[]) => {
                 if (typeof script !== "string")
                     script = '(' + script + ').apply(null, arguments);';
-                let resp = await wdapi.call<any>(this.serverURL, this._api.EXECUTE_ASYNC(session, script, args));
+                let resp = await wdapi.call<any>(this.serverURL, this._api.EXECUTE_ASYNC(session, script, ...args));
                 return resp.body.value; 
             },
 

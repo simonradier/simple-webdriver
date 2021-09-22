@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/simonradier/simple-webdriver#readme",
   "devDependencies": {
-    "@types/chai": "^4.2.18",
+    "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/mocha": "^8.2.0",
     "@types/node": "15.6.1",

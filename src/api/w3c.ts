@@ -251,7 +251,7 @@ export class W3C implements WDAPIDef {
     FINDELEMENTS(sessionId: string, using: string, value: string): RequestDef {
         let result = new WebDriverRequest();
         W3C._initHttpOptions(result);
-        result.path = `session/${sessionId}/element`;
+        result.path = `session/${sessionId}/elements`;
         result.requestOptions.method = "POST"
         result.data = { using, value }
         return result;

@@ -70,9 +70,9 @@ export class WebDriver {
             break;
             default:
                 if (element)
-                    request = (multiple) ? this._api.ELEMENT_FINDELEMENT(session, elementId, using, value) : this._api.ELEMENT_FINDELEMENTS(session, elementId, using, value);
+                    request = (multiple) ? this._api.ELEMENT_FINDELEMENTS(session, elementId, using, value) : this._api.ELEMENT_FINDELEMENT(session, elementId, using, value);
                 else
-                    request = (multiple) ? this._api.FINDELEMENT(session, using, value) : this._api.FINDELEMENTS(session, using, value);               
+                    request = (multiple) ? this._api.FINDELEMENTS(session, using, value) : this._api.FINDELEMENT(session, using, value);               
             break;
         }
         return request;

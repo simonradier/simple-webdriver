@@ -288,6 +288,144 @@ export function generateElementTest(browserType : string) {
             });
         });
 
+        describe('findElement', function () {
+            let l_element : Element;
+            let l_elementId : string;
+            beforeEach(async function () {
+                // Required for .navigate.to()
+                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+                let resp = td.WD_FIND_ELEMENTS_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
+                l_element = await g_browser.findElement(Using.tag, "body");
+                l_elementId = l_element.toString();
+            });
+
+            for (let using in Using) {
+                if (using === "className" || using === "id" || using === "name") {
+                    it('should return a Element using the execute_sync API with ' + using + ' search', async function () {
+                        let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                        nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
+                        //@ts-ignore
+                        await expect(l_element.findElement(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
+                    });
+                } else {
+                    it('should return a Element using the element API with ' + using + ' search', async function () {
+                        let resp = td.WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE.OK;
+                        nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).reply(resp.code, resp.body, resp.headers);
+                        //@ts-ignore
+                        await expect(l_element.findElement(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
+                    });
+                }
+            }
+
+            it('should throw an error if the API return an error | Nock Only', async function () {
+                let resp = td.WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE.KO_ERROR;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(l_element.findElement(Using.css, "test")).to.be.rejectedWith(/element : this is an unknown error/);
+            });
+
+
+            it('should throw a LocationError if element can\'t be found', async function () {
+                let resp = td.WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).reply(resp.code, resp.body, resp.headers);
+                await expect(l_element.findElement(Using.css, "test")).to.be.rejectedWith(/Cannot locate : test/);
+            });
+
+            it('should find an element before the timeout  | Nock Only', async function () {
+                let resp = td.WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).times(50).reply(resp.code, resp.body, resp.headers);
+                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).reply(resp2.code, resp2.body, resp2.headers);
+                await expect(l_element.findElement(Using.css, ".class_1234", 3000)).to.be.fulfilled;
+            });
+
+            it('should thrown an error if element is not found before the timeout', async function () {
+                let resp = td.WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).times(100).reply(resp.code, resp.body, resp.headers);
+                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/element`).reply(resp2.code, resp2.body, resp2.headers);
+                await expect(l_element.findElement(Using.css, ".class_dont_exist", 50)).to.be.rejectedWith(/Cannot locate :/);
+            });
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(l_element.findElement(Using.css, ".class_1234", 3000)).to.be.rejected;
+            });
+        });
+
+        describe('findElements', function () {
+            let l_element : Element;
+            let l_elementId : string;
+            beforeEach(async function () {
+                // Required for .navigate.to()
+                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+                let resp = td.WD_FIND_ELEMENTS_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
+                l_element = await g_browser.findElement(Using.tag, "body");
+                l_elementId = l_element.toString();
+            });
+
+            for (let using in Using) {
+                if (using === "className" || using === "id" || using === "name") {
+                    it('should return a Element using the execute_sync API with ' + using + ' search', async function () {
+                        let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                        nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
+                        //@ts-ignore
+                        await expect(l_element.findElements(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
+                    });
+                } else {
+                    it('should return a Element using the element API with ' + using + ' search', async function () {
+                        let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                        nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).reply(resp.code, resp.body, resp.headers);
+                        //@ts-ignore
+                        await expect(l_element.findElements(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
+                    });
+                }
+            }
+
+            it('should throw an error if the API return an error | Nock Only', async function () {
+                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).reply(resp.code, resp.body, resp.headers);
+                //@ts-ignore
+                await expect(l_element.findElements(Using.css, "test")).to.be.rejectedWith(/element : this is an unknown error/);
+            });
+
+
+            it('should throw a LocationError if element can\'t be found', async function () {
+                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).reply(resp.code, resp.body, resp.headers);
+                await expect(l_element.findElements(Using.css, "test")).to.be.rejectedWith(/Cannot locate : test/);
+            });
+
+            it('should find an element before the timeout  | Nock Only', async function () {
+                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).times(50).reply(resp.code, resp.body, resp.headers);
+                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).reply(resp2.code, resp2.body, resp2.headers);
+                await expect(l_element.findElements(Using.css, ".class_1234", 3000)).to.be.fulfilled;
+            });
+
+            it('should thrown an error if element is not found before the timeout', async function () {
+                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).times(100).reply(resp.code, resp.body, resp.headers);
+                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element/${l_elementId}/elements`).reply(resp2.code, resp2.body, resp2.headers);
+                await expect(l_element.findElements(Using.css, ".class_dont_exist", 50)).to.be.rejectedWith(/Cannot locate :/);
+            });
+
+            it('should throw an error if browser is closed', async function() {
+                //@ts-ignore required for test purpose
+                g_browser._closed = true;
+                await expect(l_element.findElements(Using.css, ".class_1234", 3000)).to.be.rejected;
+            });
+        });
+
         describe('isEnabled', function () {
             it('should return if an element is enabled if webdriver response is successful 1/2', async function () {
                 let element : Element = await g_browser.findElement(Using.tag, "input");

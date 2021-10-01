@@ -216,6 +216,44 @@ export let WD_FIND_ELEMENT_RESPONSE = {
     }
 }
 
+export let WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE = WD_FIND_ELEMENT_RESPONSE;
+
+export let WD_FIND_ELEMENTS_RESPONSE = {
+    OK : {
+        code : 200,
+        body : {
+            "value" : [{ 
+                "element-6066-11e4-a52e-4f735466cecf": WD_ELEMENT_ID
+            }]
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO_NOT_FOUND : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error": "no such element",
+                "message": "no such element: Unable to locate element: {\"method\":\"method\",\"selector\":\"value\"}\n",
+                "stacktrace" : "test stacktrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}        
+    },
+    KO_ERROR : {
+        code : 500,
+        body : {
+            "value" : { 
+                "error" : "element", 
+                "message" : "this is an unknown error",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }
+}
+
+export let WD_FIND_ELEMENT_FROM_ELEMENTS_RESPONSE = WD_FIND_ELEMENTS_RESPONSE;
+
 export let WD_EXECUTE_SYNC_RESPONSE = {
     OK_NUMBER : {
         code : 200,

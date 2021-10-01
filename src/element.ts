@@ -81,8 +81,16 @@ export class Element {
      * 
      * @returns 
      */
-    public findElement(using : Using, value : string, timeout : number) : Promise<Element> {
+    public findElement(using : Using, value : string, timeout : number = null) : Promise<Element> {
         return this._driver.element(this).findElement(using, value, timeout);
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+     public findElements(using : Using, value : string, timeout : number = null) : Promise<Element[]> {
+        return this._driver.element(this).findElements(using, value, timeout);
     }
 
     public toString() {

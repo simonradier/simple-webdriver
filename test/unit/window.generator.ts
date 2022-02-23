@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import nock from "nock";
-import { LoggerConfiguration, LogLevel } from "../../src/utils/logger";
+import { loggerConfiguration, LogLevel } from "../../src/utils/logger";
 import { Window, Browser, BrowserType, WebDriver } from "../../src/swd";
 import * as td from './data';
 
@@ -12,7 +12,7 @@ export function generateWindowTest(browserType : string) {
         let g_window : Window = null;
         before(async function () {
             // Deactivate WebDriver Logs
-            LoggerConfiguration.logLevel = LogLevel.Trace;
+            loggerConfiguration.logLevel = LogLevel.Trace;
             // Clean previous sessions
             await WebDriver.cleanSessions();
             g_driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);

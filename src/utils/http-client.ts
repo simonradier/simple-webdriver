@@ -13,7 +13,7 @@ export class HttpResponse<T> {
 export async function call<T>(url : string, httpOptions : http.RequestOptions | https.RequestOptions, body : any = null) : Promise<HttpResponse<T>> {
     return new Promise<HttpResponse<any>> ((resolve, reject) => {
         let req : http.ClientRequest;
-        let sBody = JSON.stringify(body);
+        const sBody = JSON.stringify(body);
         httpOptions.timeout = 1000 * 10;
         if (body)
             httpOptions.headers['Content-Length'] = sBody.length;
@@ -28,11 +28,11 @@ export async function call<T>(url : string, httpOptions : http.RequestOptions | 
                 data += chunk;
             });
             res.on('end', () => {
-                let response = new HttpResponse<T>();
+                const response = new HttpResponse<T>();
                 response.statusCode = res.statusCode;
                 response.statusMessage = res.statusMessage
                 if (!res.headers || !(res.headers["content-type"] && res.headers["content-type"].includes("application/json"))) {
-                    let err = new Error("Incorrect HTTP header 'content-type', expected 'application/json'")
+                    const err = new Error("Incorrect HTTP header 'content-type', expected 'application/json'")
                     reject(err);
                 } else {
                     try {

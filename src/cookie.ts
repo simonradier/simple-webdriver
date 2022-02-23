@@ -1,6 +1,5 @@
 import { CookieDef } from "./interface";
-import { WindowRect } from "./interface/window-rect";
-import { Browser, WebDriver } from "./swd"
+import { Browser } from "./swd"
 
 export class Cookie implements CookieDef {
     public readonly name: string;

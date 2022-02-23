@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export enum LogLevel {
     Debug = 0,
     Trace,
@@ -8,7 +9,7 @@ export enum LogLevel {
     None
 }
 
-export let LoggerConfiguration = { logLevel : LogLevel.Debug };
+export const loggerConfiguration = { logLevel : LogLevel.Debug };
 
 export class Logger {
 
@@ -19,15 +20,13 @@ export class Logger {
 
     public static _getCallerInfo() : string {
         //  at [SCOPE].[CLASS].[METHOD] (/Users/critik/Documents/Projects/domobot/src/utils/logger.ts:15:21)
-        let strInfo : string = (<string> (new Error().stack)).split("\n")[3].split("at ")[1];
-        let leftStr : string = strInfo.split(" (")[0];
-        let rightStr : string =  strInfo.split(" (")[1];
+        const strInfo : string = (<string> (new Error().stack)).split("\n")[3].split("at ")[1];
+        const leftStr : string = strInfo.split(" (")[0];
+        const rightStr : string =  strInfo.split(" (")[1];
         // If no function name
-        let rightSplitInfo : string[] = rightStr ? rightStr.split("/") : leftStr.split("/");
-        let className :  string = "";
+        const rightSplitInfo : string[] = rightStr ? rightStr.split("/") : leftStr.split("/");
         let methodname : string = "";
         let fileLineNumber : string = "";
-        let getInfo : number = 0;
         if (rightStr) {
             methodname = leftStr;
             fileLineNumber = rightSplitInfo[rightSplitInfo.length - 1].split(/:[0-9]*\)/)[0];
@@ -39,7 +38,7 @@ export class Logger {
     }
 
     public static trace(msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Trace) {
+        if (loggerConfiguration.logLevel <= LogLevel.Trace) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[TRACE]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);
@@ -50,7 +49,7 @@ export class Logger {
     }
 
     public static debug(msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Debug) {
+        if (loggerConfiguration.logLevel <= LogLevel.Debug) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[DEBUG]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);
@@ -61,7 +60,7 @@ export class Logger {
     }
 
     public static info (msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Information) {
+        if (loggerConfiguration.logLevel <= LogLevel.Information) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[INFO]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);
@@ -72,7 +71,7 @@ export class Logger {
     }
 
     public static warn (msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Warning) {
+        if (loggerConfiguration.logLevel <= LogLevel.Warning) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[WARNING]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);
@@ -83,7 +82,7 @@ export class Logger {
     }
 
     public static error (msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Error) {
+        if (loggerConfiguration.logLevel <= LogLevel.Error) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[ERROR]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);
@@ -94,7 +93,7 @@ export class Logger {
     }
 
     public static critical (msg : any) {
-        if (LoggerConfiguration.logLevel <= LogLevel.Critical) {
+        if (loggerConfiguration.logLevel <= LogLevel.Critical) {
             if (typeof msg === "object" && msg != null) {
                 console.log("[CRITICAL]" + "[" +this._getDateString() + "][" + this._getCallerInfo() + "] : ");
                 console.log(msg);

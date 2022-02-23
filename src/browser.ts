@@ -1,7 +1,7 @@
 import { Element } from ".";
 import { WebDriverError } from "./error";
 import { TimeoutsDef } from "./interface/timeouts";
-import { Capabilities, Using, WebDriver, Window } from "./swd";
+import { Capabilities, Using, WebDriver } from "./swd";
 import { WindowType } from "./window";
 
 export enum BrowserType {

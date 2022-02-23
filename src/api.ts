@@ -23,6 +23,5 @@ export async function call<T>(url : URL, request : RequestDef) {
 
 }
 
-export * from "./api/jsonwire"
 export * from "./api/w3c"
 export * from "./api/webdriver-request"

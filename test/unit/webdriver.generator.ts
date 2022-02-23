@@ -2,7 +2,7 @@ import * as chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { expect } from 'chai';
 import { Browser, WebDriver, Using, Element, Capabilities, BrowserType } from "../../src/swd";
-import { LoggerConfiguration, LogLevel } from "../../src/utils/logger";
+import { loggerConfiguration, LogLevel } from "../../src/utils/logger";
 import nock from "nock";
 import * as td from './data';
 
@@ -12,7 +12,7 @@ export function generateWebDriverTest(browserType : string) {
     describe('WebDriver', function (){ 
         before(async function () {
             // Deactivate WebDriver Logs
-            LoggerConfiguration.logLevel = LogLevel.Trace;
+            loggerConfiguration.logLevel = LogLevel.Trace;
             // Clean previous sessions
             await WebDriver.cleanSessions();
         });

@@ -55,17 +55,26 @@ export class WebDriver {
         const elementId = (element) ? element.toString() : null;
     
         let script : string = "";
-        let request : RequestDef;
-    
+        let request : RequestDef
+ 
         switch (using) {
             case Using.id :
                 script = (multiple) ? `return [ document.getElementById(arguments[0]) ];` : `return document.getElementById(arguments[0]);`;
-            case Using.className :
+                if (element)
+                    Logger.warn('Can\'t retreive inside an element for "id" locator, using document scope instead');
+                request = this._api.EXECUTE_SYNC(session, script, [ value ]);
+                break;
             case Using.name  :
-                script = (script !== "") ? script : `return ${elementOrDocument}.getElementsBy` + using.charAt(0).toUpperCase() + using.slice(1) + `(arguments[${argNumber}])` + ((multiple) ? "" : "[0]")
+                script = `return document.getElementsByName(arguments[0])` + ((multiple) ? "" : "[0]")
+                if (element)
+                    Logger.warn('Can\'t retreive inside an element for "name" locator, using document scope instead');
+                request = this._api.EXECUTE_SYNC(session, script, [ value ]);
+                break
+            case Using.className :
+                script = `return ${elementOrDocument}.getElementsByClassName(arguments[${argNumber}])` + ((multiple) ? "" : "[0]")
                 if (element)
                     request = this._api.EXECUTE_SYNC(session, script, [ element , value ]);
-                else 
+                else
                     request = this._api.EXECUTE_SYNC(session, script, [ value ]);
             break;
             default:
@@ -96,6 +105,8 @@ export class WebDriver {
 
     /** @internal  */
     public browser(browser : Browser) {
+        if (browser.closed)
+            throw (new WebDriverError("Browser session is closed."));
         const session = browser.session;
         return {
             /**
@@ -170,17 +181,19 @@ export class WebDriver {
                         resp = error.httpResponse;
                         Logger.trace(resp || err);
                     }
-                } while (resp && (resp.body.value === null || resp.statusCode !== 200 ) && timer)
+                    // findElements in element will return an empty array with a 200 Ok code, if nothing is found
+                } while (resp && (resp.body.value === null || (Array.isArray(resp.body.value) && resp.body.value.length === 0) || resp.statusCode !== 200 ) && timer)
 
-                if (resp && resp.statusCode === 200 && resp.body.value) { // If the look up succeded
-                let result : Element | Element[];
+
+                if (resp && resp.statusCode === 200 && ((Array.isArray(resp.body.value) && resp.body.value.length !== 0) || (!Array.isArray(resp.body.value) && resp.body.value))) { // If the look up succeded
+                    let result : Element | Element[];
                     if (Array.isArray(resp.body.value))
                         result = resp.body.value.map((elem) => { return new Element(elem["element-6066-11e4-a52e-4f735466cecf"], browser, this)});
                     else
                         result = new Element(resp.body.value["element-6066-11e4-a52e-4f735466cecf"], browser, this)
                     return result;
                 } else { // if the lookup failed
-                    if (resp && resp.statusCode === 404)
+                    if (resp)
                         throw (new LocationError(using, value, timeout));
                     else
                         throw (error);

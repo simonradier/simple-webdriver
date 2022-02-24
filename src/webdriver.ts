@@ -193,7 +193,7 @@ export class WebDriver {
                         result = new Element(resp.body.value["element-6066-11e4-a52e-4f735466cecf"], browser, this)
                     return result;
                 } else { // if the lookup failed
-                    if (resp)
+                    if (resp && resp.statusCode < 500)
                         throw (new LocationError(using, value, timeout));
                     else
                         throw (error);

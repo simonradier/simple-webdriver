@@ -19,9 +19,9 @@ import { WebDriver } from "simple-webdriver"
 
 async function example() {
     let session =  new WebDriver("http://localhost:4440/wd/hub");
-    session.start();
-    await session.window().navigate().to("http://perdu.com");
-    let title = await session.window().getTitle();
+    let browser = await session.start();
+    await browser.navigate().to("http://perdu.com");
+    let title = await browser.getTitle();
     console.log(title);
 } 
 

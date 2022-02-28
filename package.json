@@ -1,5 +1,5 @@
 {
-  "name": "simple-webdriver",
+  "name": "@critik/simple-webdriver",
   "version": "0.1.0",
   "description": "A javascript webdriver bindings with no dependency",
   "keywords": [

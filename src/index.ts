@@ -1,3 +1,3 @@
-import { WebDriver, Browser, Cookie, Window, Element, Capabilities, WebDriverRequest } from "./swd"
+import { WebDriver, Browser, Cookie, Window, Element, Capabilities, WebDriverRequest, Protocol, Using } from "./swd"
 
-export { WebDriver, Browser, Cookie, Window, Element, Capabilities, WebDriverRequest }
+export { WebDriver, Browser, Cookie, Window, Element, Capabilities, WebDriverRequest, Protocol, Using }

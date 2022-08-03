@@ -139,6 +139,10 @@ export class Browser {
         return this._webdriver.browser(this).navigate();
     }
 
+    public screenshot() {
+        return this._webdriver.browser(this).screenshot();
+    }
+
     /**
      * 
      */

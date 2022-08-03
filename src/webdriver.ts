@@ -249,7 +249,9 @@ export class WebDriver {
             deleteAllCookies : () => {
                 return wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETEALL(session));
             },
-
+            screenshot : () => {
+                return wdapi.call<string>(this.serverURL, this._api.SCREENSHOT(session));
+            },
             cookie : () => {
                 return {
                     create : async (cookie : Cookie) => {

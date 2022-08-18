@@ -1,13 +1,16 @@
 export class Capabilities {
-
-    public headless : boolean = false;
     public args : string[] = new Array<string>();
+
     public addArguments (arg : string) {
         this.args.push(arg);
     }
 
-    public static default = new Capabilities();
+    public get headless () : boolean {
+        return this.args.some((arg) => (arg.includes("headless")))
+    }
+
     public static headless =  new Capabilities();
+    public static default =  new Capabilities();
 }
 
-Capabilities.headless.headless = true;
+Capabilities.headless.args = ["--headless"];

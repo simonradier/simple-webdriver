@@ -374,7 +374,7 @@ export class WebDriver {
     }
 
     public async start(browserType : BrowserType, capabilities : Capabilities = Capabilities.default) : Promise<Browser> {
-        const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(browserType, capabilities.headless));
+        const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(browserType, capabilities.args));
         let error : WebDriverResponseError;
 
         if (!resp.body.value) {

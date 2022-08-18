@@ -13,7 +13,7 @@ export class W3C implements WDAPIDef {
         }
     }
 
-    SESSION_START(browser: string, headless: boolean): RequestDef {
+    SESSION_START(browser: string, args: string[]): RequestDef {
         const result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.data = {
@@ -38,21 +38,18 @@ export class W3C implements WDAPIDef {
             case "safari":
                 browserOptions = "safari:options";
         }
-        result.data.capabilities.alwaysMatch[browserOptions] = { args: new Array() };
-        if (headless) {
+        if (args.some(arg => arg.includes("headless"))) {
             switch (browser) {
                 case "msedge" :
                 case "chrome" :
                 case "chromium":
-                    result.data.capabilities.alwaysMatch[browserOptions].args.push("headless");
-                break
                 case "firefox" :
-                    result.data.capabilities.alwaysMatch[browserOptions].args.push("-headless");
                 break
                 default: 
                     Logger.warn("headless feature is not supported by : " + browser)
             }
         }
+        result.data.capabilities.alwaysMatch[browserOptions] = { args };
         //result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
         result.path = "session";
         result.requestOptions.method = "POST"

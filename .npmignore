@@ -1,0 +1,11 @@
+src/
+.vscode/
+.nyc_output/
+coverage/
+test/
+.gitignore
+package-lock.json
+tsconfig.json
+.eslintrc.json
+*.map
+.github

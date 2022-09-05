@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 export enum WD_TESTED_Browser {
     Chrome = "chrome",
     //Chromium = "chromium",
@@ -14,7 +15,7 @@ export enum WD_TESTED_Driver {
     Safari = "safaridriver"
 }
 
-export let WD_SERVER_URL_HTTP = {
+export const WD_SERVER_URL_HTTP = {
     Chrome : "http://localhost:9515",
     Firefox : "http://localhost:4444",
     Chromium : "http://localhost:9515",
@@ -22,7 +23,7 @@ export let WD_SERVER_URL_HTTP = {
     Safari : "http://localhost:9315",
 }
 
-export let WD_SERVER_URL_HTTPS = {
+export const WD_SERVER_URL_HTTPS = {
     Chrome : "https://localhost:9515",
     Firefox : "https://localhost:4444",
     Chromium : "https://localhost:9515",
@@ -30,32 +31,32 @@ export let WD_SERVER_URL_HTTPS = {
     Safari : "https://localhost:9315",
 }
 
-export let WD_WEBSITE_URL_HTTP =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/"
+export const WD_WEBSITE_URL_HTTP =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/"
 
-export let WD_WEBSITE_URL_HTTP_1 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test1.html"
+export const WD_WEBSITE_URL_HTTP_1 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test1.html"
 
-export let WD_WEBSITE_URL_HTTP_2 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test2.html"
-
-
-export let WD_SESSION_ID = "session-test-id-1337"
-
-export let WD_ELEMENT_ID = "element-test-id-1337"
-
-export let WD_ELEMENT_ID_FAKE = "element-FAKE-id-1337"
-
-export let WD_WINDOW_ID = "window-test-id-1337"
-
-export let WD_WINDOW2_ID = "window-test-id-1667"
-
-export let WD_ATTRIBUTE_NAME = "value"
-
-export let WD_CSS_ATTRIBUTE_NAME = "text-align"
-
-export let WD_PROPERTY_NAME = "value"
+export const WD_WEBSITE_URL_HTTP_2 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test2.html"
 
 
+export const WD_SESSION_ID = "session-test-id-1337"
 
-export let WD_ELEMENT_SEARCH = {
+export const WD_ELEMENT_ID = "element-test-id-1337"
+
+export const WD_ELEMENT_ID_FAKE = "element-FAKE-id-1337"
+
+export const WD_WINDOW_ID = "window-test-id-1337"
+
+export const WD_WINDOW2_ID = "window-test-id-1667"
+
+export const WD_ATTRIBUTE_NAME = "value"
+
+export const WD_CSS_ATTRIBUTE_NAME = "text-align"
+
+export const WD_PROPERTY_NAME = "value"
+
+
+
+export const WD_ELEMENT_SEARCH = {
     id : "id_1234",
     name : "input_1234",
     className : "class_1234",
@@ -66,7 +67,7 @@ export let WD_ELEMENT_SEARCH = {
     xpath : "/html/body/span"
 }
 
-export let WD_CAPABILITIES = {
+export const WD_CAPABILITIES = {
     "acceptInsecureCerts": false,
     "browserName": "chrome",
     "browserVersion": "88.0.4324.146",
@@ -85,7 +86,7 @@ export let WD_CAPABILITIES = {
     "webauthn:virtualAuthenticators": true
 }
 
-export let WD_START_SESSION_RESPONSE = { 
+export const WD_START_SESSION_RESPONSE = { 
     OK : {
         code : 200,
         body : {
@@ -160,7 +161,7 @@ export let WD_START_SESSION_RESPONSE = {
     }
 }
 
-export let WD_STOP_SESSION_RESPONSE = {
+export const WD_STOP_SESSION_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -182,7 +183,7 @@ export let WD_STOP_SESSION_RESPONSE = {
     }  
 }
 
-export let WD_FIND_ELEMENT_RESPONSE = {
+export const WD_FIND_ELEMENT_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -216,9 +217,9 @@ export let WD_FIND_ELEMENT_RESPONSE = {
     }
 }
 
-export let WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE = WD_FIND_ELEMENT_RESPONSE;
+export const WD_FIND_ELEMENT_FROM_ELEMENT_RESPONSE = WD_FIND_ELEMENT_RESPONSE;
 
-export let WD_FIND_ELEMENTS_RESPONSE = {
+export const WD_FIND_ELEMENTS_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -252,9 +253,9 @@ export let WD_FIND_ELEMENTS_RESPONSE = {
     }
 }
 
-export let WD_FIND_ELEMENT_FROM_ELEMENTS_RESPONSE = WD_FIND_ELEMENTS_RESPONSE;
+export const WD_FIND_ELEMENT_FROM_ELEMENTS_RESPONSE = WD_FIND_ELEMENTS_RESPONSE;
 
-export let WD_EXECUTE_SYNC_RESPONSE = {
+export const WD_EXECUTE_SYNC_RESPONSE = {
     OK_NUMBER : {
         code : 200,
         body : {
@@ -298,9 +299,9 @@ export let WD_EXECUTE_SYNC_RESPONSE = {
     }
 }
 
-export let WD_EXECUTE_ASYNC_RESPONSE = WD_EXECUTE_SYNC_RESPONSE;
+export const WD_EXECUTE_ASYNC_RESPONSE = WD_EXECUTE_SYNC_RESPONSE;
 
-export let WD_NAVIGATE_TO_RESPONSE = {
+export const WD_NAVIGATE_TO_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -322,7 +323,7 @@ export let WD_NAVIGATE_TO_RESPONSE = {
     }
 }
 
-export let WD_NAVIGATE_CURRENTURL = {
+export const WD_NAVIGATE_CURRENTURL = {
     OK : {
         code : 200,
         body : {
@@ -357,7 +358,7 @@ export let WD_NAVIGATE_CURRENTURL = {
     }
 }
 
-export let WD_NAVIGATE_REFRESH_RESPONSE = {
+export const WD_NAVIGATE_REFRESH_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -380,7 +381,7 @@ export let WD_NAVIGATE_REFRESH_RESPONSE = {
 }
 
 
-export let WD_NAVIGATE_BACK_RESPONSE = {
+export const WD_NAVIGATE_BACK_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -403,7 +404,7 @@ export let WD_NAVIGATE_BACK_RESPONSE = {
 }
 
 
-export let WD_NAVIGATE_FORWARD_RESPONSE = {
+export const WD_NAVIGATE_FORWARD_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -425,7 +426,7 @@ export let WD_NAVIGATE_FORWARD_RESPONSE = {
     }
 }
 
-export let WD_WINDOW_HANDLE_RESPONSE = {
+export const WD_WINDOW_HANDLE_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -447,7 +448,7 @@ export let WD_WINDOW_HANDLE_RESPONSE = {
     }
 }
 
-export let WD_WINDOW_HANDLES_RESPONSE = {
+export const WD_WINDOW_HANDLES_RESPONSE = {
     OK : {
         code : 200,
         body : {
@@ -469,7 +470,7 @@ export let WD_WINDOW_HANDLES_RESPONSE = {
     }
 }
 
-export let WD_WINDOW_OPEN = {
+export const WD_WINDOW_OPEN = {
     OK : {
         code : 200,
         body : {
@@ -491,7 +492,7 @@ export let WD_WINDOW_OPEN = {
     }
 }
 
-export let WD_ELEMENT_CLICK = {
+export const WD_ELEMENT_CLICK = {
     OK : {
         code : 200,
         body : {
@@ -513,7 +514,7 @@ export let WD_ELEMENT_CLICK = {
     }
 }
 
-export let WD_ELEMENT_CLEAR = {
+export const WD_ELEMENT_CLEAR = {
     OK : {
         code : 200,
         body : {
@@ -535,7 +536,7 @@ export let WD_ELEMENT_CLEAR = {
     }
 }
 
-export let WD_ELEMENT_SENDKEYS = {
+export const WD_ELEMENT_SENDKEYS = {
     OK : {
         code : 200,
         body : {
@@ -557,7 +558,7 @@ export let WD_ELEMENT_SENDKEYS = {
     }
 }
 
-export let WD_ELEMENT_GETTEXT = {
+export const WD_ELEMENT_GETTEXT = {
     OK : {
         code : 200,
         body : {
@@ -578,7 +579,7 @@ export let WD_ELEMENT_GETTEXT = {
     }
 }
 
-export let WD_ELEMENT_GETVALUE = {
+export const WD_ELEMENT_GETVALUE = {
     OK : {
         code : 200,
         body : {
@@ -614,7 +615,7 @@ export let WD_ELEMENT_GETVALUE = {
 }
 
 
-export let WD_ELEMENT_GETATTRIBUTE = {
+export const WD_ELEMENT_GETATTRIBUTE = {
     OK : {
         code : 200,
         body : {
@@ -642,7 +643,7 @@ export let WD_ELEMENT_GETATTRIBUTE = {
     }
 }
 
-export let WD_ELEMENT_GETPROPERTY = {
+export const WD_ELEMENT_GETPROPERTY = {
     OK : {
         code : 200,
         body : {
@@ -671,7 +672,7 @@ export let WD_ELEMENT_GETPROPERTY = {
 }
 
 
-export let WD_ELEMENT_GETTAGNAME = {
+export const WD_ELEMENT_GETTAGNAME = {
     OK : {
         code : 200,
         body : {
@@ -692,7 +693,7 @@ export let WD_ELEMENT_GETTAGNAME = {
     }
 }
 
-export let WD_ELEMENT_GETCSSVALUE = {
+export const WD_ELEMENT_GETCSSVALUE = {
     OK : {
         code : 200,
         body : {
@@ -713,7 +714,7 @@ export let WD_ELEMENT_GETCSSVALUE = {
     }
 }
 
-export let WD_ELEMENT_ISSELECTED = {
+export const WD_ELEMENT_ISSELECTED = {
     OK : {
         code : 200,
         body : {
@@ -741,7 +742,7 @@ export let WD_ELEMENT_ISSELECTED = {
     }
 }
 
-export let WD_ELEMENT_ISENABLED= {
+export const WD_ELEMENT_ISENABLED= {
     OK : {
         code : 200,
         body : {
@@ -769,7 +770,7 @@ export let WD_ELEMENT_ISENABLED= {
     }
 }
 
-export let WD_ELEMENT_SCREENSHOT= {
+export const WD_ELEMENT_SCREENSHOT= {
     OK : {
         code : 200,
         body : {
@@ -790,7 +791,7 @@ export let WD_ELEMENT_SCREENSHOT= {
     }
 }
 
-export let WD_WINDOW_GETTITLE= {
+export const WD_WINDOW_GETTITLE= {
     OK : {
         code : 200,
         body : {
@@ -811,7 +812,7 @@ export let WD_WINDOW_GETTITLE= {
     }
 }
 
-export let  WD_WINDOW_SETSIZE = (width, height) => {
+export const  WD_WINDOW_SETSIZE = (width, height) => {
     return {
         OK : {
             code : 200,
@@ -839,7 +840,7 @@ export let  WD_WINDOW_SETSIZE = (width, height) => {
     }
 }
 
-export let WD_WINDOW_GETSIZE = {
+export const WD_WINDOW_GETSIZE = {
     OK : {
         code : 200,
         body : {
@@ -865,7 +866,7 @@ export let WD_WINDOW_GETSIZE = {
     }
 }
 
-export let WD_WINDOW_SWITCH = {
+export const WD_WINDOW_SWITCH = {
     OK : {
         code : 200,
         body : {
@@ -888,7 +889,7 @@ export let WD_WINDOW_SWITCH = {
 }
 
 
-export let  WD_WINDOW_MAXIMIZE = {
+export const  WD_WINDOW_MAXIMIZE = {
         OK : {
             code : 200,
             body : {
@@ -914,11 +915,11 @@ export let  WD_WINDOW_MAXIMIZE = {
         }
 }
 
-export let WD_WINDOW_MINIMIZE = WD_WINDOW_MAXIMIZE;
+export const WD_WINDOW_MINIMIZE = WD_WINDOW_MAXIMIZE;
 
-export let WD_WINDOW_FULLSCREEN = WD_WINDOW_MAXIMIZE;
+export const WD_WINDOW_FULLSCREEN = WD_WINDOW_MAXIMIZE;
 
-export let  WD_WINDOW_CLOSE = {
+export const  WD_WINDOW_CLOSE = {
     OK : {
         code : 200,
         body : {
@@ -938,6 +939,56 @@ export let  WD_WINDOW_CLOSE = {
         headers : { "Content-Type" : "application/json" }
     }
 }
+
+export const  WD_COOKIE_GET = {
+    OK : {
+        code : 200,
+        body : {
+            "value" : {
+                "name" : "cookie1",
+                "value" :  "test"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error" : "no such cookie", 
+                "message" : "no such cookie",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json" }
+    }
+}
+
+export const  WD_COOKIE_GETALL = {
+    OK : {
+        code : 200,
+        body : {
+            "value" : [
+                { "name" : "cookie1", "value" :  "test"},
+                { "name" : "cookie2", "value" :  "hello"},
+            ]
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error" : "no such cookie", 
+                "message" : "no such cookie",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json" }
+    }
+}
+
+
 
 
 

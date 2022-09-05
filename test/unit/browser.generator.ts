@@ -9,8 +9,8 @@ import * as td from './data';
 
 export function generateBrowserTest(browserType : string) { 
     describe('Browser', function (){
-        let g_driver : WebDriver = null;
-        let g_browser : Browser = null;
+        let g_driver : WebDriver ;
+        let g_browser : Browser;
         before(async function () {
             // Deactivate WebDriver Logs
             loggerConfiguration.logLevel = LogLevel.Trace;
@@ -31,21 +31,21 @@ export function generateBrowserTest(browserType : string) {
         beforeEach(async function () {
             nock.cleanAll();
             // Required for session Start
-            let resp = td.WD_START_SESSION_RESPONSE.OK;
+            const resp = td.WD_START_SESSION_RESPONSE.OK;
             nock(td.WD_SERVER_URL_HTTP[browserType]).post("/session").reply(resp.code, resp.body, resp.headers);
             g_browser = await g_driver.start(BrowserType[browserType]);
         });
 
         describe('close', function () {
             it('should close the browser and the associated windows if the webdriver response is successful', async function() {
-                let resp = td.WD_STOP_SESSION_RESPONSE.OK;
+                const resp = td.WD_STOP_SESSION_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.close()).to.be.fulfilled;
                 expect(g_browser.closed).to.be.true;
             }); 
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () {
-                let resp = td.WD_STOP_SESSION_RESPONSE.KO_ERROR;
+                const resp = td.WD_STOP_SESSION_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.close()).to.be.rejected;
             });    
@@ -59,13 +59,13 @@ export function generateBrowserTest(browserType : string) {
 
         describe ('getCurrentWindow', function () {
             it('should return the window\'s handle if the webdriver response is successful', async function() { 
-                let resp = td.WD_WINDOW_HANDLE_RESPONSE.OK;
+                const resp = td.WD_WINDOW_HANDLE_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getCurrentWindow()).to.be.fulfilled;
             });
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () {
-                let resp = td.WD_WINDOW_HANDLE_RESPONSE.KO;
+                const resp = td.WD_WINDOW_HANDLE_RESPONSE.KO;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getCurrentWindow()).to.be.rejected;
             });    
@@ -80,18 +80,18 @@ export function generateBrowserTest(browserType : string) {
         describe('getTitle', async function () {
             beforeEach(async function () {
                 // Required for .navigate
-                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                 await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
             it('should return the title of the windows if the webdriver server response is successful', async function() {  
-                let resp = td.WD_WINDOW_GETTITLE.OK;
+                const resp = td.WD_WINDOW_GETTITLE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getTitle()).to.become("WD2 Test Page");
             });
             it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
-                let resp = td.WD_WINDOW_GETTITLE.KO;
+                const resp = td.WD_WINDOW_GETTITLE.KO;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/title`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getTitle()).to.be.rejected;
             });  
@@ -105,13 +105,13 @@ export function generateBrowserTest(browserType : string) {
 
         describe ('getAllWindows', function () {
             it('should return the window\'s handle if the webdriver response is successful', async function() {  
-                let resp = td.WD_WINDOW_HANDLES_RESPONSE.OK;
+                const resp = td.WD_WINDOW_HANDLES_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getAllWindows()).to.be.fulfilled;
             });
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () {  
-                let resp = td.WD_WINDOW_HANDLES_RESPONSE.KO;
+                const resp = td.WD_WINDOW_HANDLES_RESPONSE.KO;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/window/handles`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.getAllWindows()).to.be.rejected;
             });  
@@ -125,19 +125,19 @@ export function generateBrowserTest(browserType : string) {
 
         describe('newWindow', function () {
             it('should open a new window  if the webdriver response is successful (new Window)', async function() {  
-                let resp = td.WD_WINDOW_OPEN.OK;
+                const resp = td.WD_WINDOW_OPEN.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.newWindow(WindowType.Window)).to.be.fulfilled;
             });
 
             it('should open a new window  if the webdriver response is successful (new Window)', async function() {  
-                let resp = td.WD_WINDOW_OPEN.OK;
+                const resp = td.WD_WINDOW_OPEN.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.newWindow(WindowType.Tab)).to.be.fulfilled;
             });
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () {  
-                let resp = td.WD_WINDOW_OPEN.KO;
+                const resp = td.WD_WINDOW_OPEN.KO;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/window/new`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.newWindow(WindowType.Tab)).to.be.rejected;
             });  
@@ -152,22 +152,22 @@ export function generateBrowserTest(browserType : string) {
         describe('findElement', function () {
             beforeEach(async function () {
                 // Required for .navigate.to()
-                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                 await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
-            for (let using in Using) {
+            for (const using in Using) {
                 if (using === "className" || using === "id" || using === "name") {
                     it('should return a Element using the execute_sync API with ' + using + ' search', async function () {
-                        let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                        const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
                         nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
                         await expect(g_browser.findElement(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
                     });
                 } else {
                     it('should return a Element using the element API with ' + using + ' search', async function () {
-                        let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                        const resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                         nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
                         await expect(g_browser.findElement(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
@@ -176,7 +176,7 @@ export function generateBrowserTest(browserType : string) {
             }
 
             it('should throw an error if the API return an error | Nock Only', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.findElement(Using.css, "test")).to.be.rejectedWith(/element : this is an unknown error/);
@@ -184,23 +184,23 @@ export function generateBrowserTest(browserType : string) {
 
 
             it('should throw a LocationError if element can\'t be found', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp.code, resp.body, resp.headers);
                 await expect(g_browser.findElement(Using.css, "test")).to.be.rejectedWith(/Cannot locate : test/);
             });
 
             it('should find an element before the timeout  | Nock Only', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).times(50).reply(resp.code, resp.body, resp.headers);
-                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                const resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp2.code, resp2.body, resp2.headers);
                 await expect(g_browser.findElement(Using.css, ".class_1234", 3000)).to.be.fulfilled;
             });
 
             it('should thrown an error if element is not found before the timeout', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).times(100).reply(resp.code, resp.body, resp.headers);
-                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                const resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/element`).reply(resp2.code, resp2.body, resp2.headers);
                 await expect(g_browser.findElement(Using.css, ".class_dont_exist", 50)).to.be.rejectedWith(/Cannot locate :/);
             });
@@ -215,22 +215,22 @@ export function generateBrowserTest(browserType : string) {
         describe('findElements', function () {
             beforeEach(async function () {
                 // Required for .navigate.to()
-                let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                 await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
-            for (let using in Using) {
+            for (const using in Using) {
                 if (using === "className" || using === "id" || using === "name") {
                     it('should return a Element using the execute_sync API with ' + using + ' search', async function () {
-                        let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                        const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
                         nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
                         await expect(g_browser.findElements(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
                     });
                 } else {
                     it('should return a Element using the element API with ' + using + ' search', async function () {
-                        let resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                        const resp = td.WD_FIND_ELEMENT_RESPONSE.OK;
                         nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).reply(resp.code, resp.body, resp.headers);
                         //@ts-ignore
                         await expect(g_browser.findElements(Using[using], td.WD_ELEMENT_SEARCH[using])).to.be.fulfilled;
@@ -239,7 +239,7 @@ export function generateBrowserTest(browserType : string) {
             }
 
             it('should throw an error if the API return an error | Nock Only', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.findElements(Using.css, "test")).to.be.rejectedWith(/element : this is an unknown error/);
@@ -247,23 +247,23 @@ export function generateBrowserTest(browserType : string) {
 
 
             it('should throw a LocationError if element can\'t be found', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).reply(resp.code, resp.body, resp.headers);
                 await expect(g_browser.findElements(Using.css, "test")).to.be.rejectedWith(/Cannot locate : test/);
             });
 
             it('should find an element before the timeout  | Nock Only', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).times(50).reply(resp.code, resp.body, resp.headers);
-                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                const resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).reply(resp2.code, resp2.body, resp2.headers);
                 await expect(g_browser.findElements(Using.css, ".class_1234", 3000)).to.be.fulfilled;
             });
 
             it('should thrown an error if element is not found before the timeout', async function () {
-                let resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
+                const resp = td.WD_FIND_ELEMENT_RESPONSE.KO_NOT_FOUND;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).times(100).reply(resp.code, resp.body, resp.headers);
-                let resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
+                const resp2 = td.WD_FIND_ELEMENT_RESPONSE.OK;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/elements`).reply(resp2.code, resp2.body, resp2.headers);
                 await expect(g_browser.findElements(Using.css, ".class_dont_exist", 50)).to.be.rejectedWith(/Cannot locate :/);
             });
@@ -277,34 +277,34 @@ export function generateBrowserTest(browserType : string) {
 
         describe('executeSync', function () {
             it('should execute the function and return the correct value if webdriver response is successful (1)', async function() {
-                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_STRING;
+                const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_STRING;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeSync(() => { return "hello"; })).to.be.fulfilled;
-                let val = await g_browser.executeSync(() => { return "hello"; });
+                const val = await g_browser.executeSync(() => { return "hello"; });
                 expect(val).to.be.equal("hello");
             }); 
 
             it('should execute the function and return the correct value if webdriver response is successful (2)', async function() {
-                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_NUMBER;
+                const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_NUMBER;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeSync(() => { return 10; })).to.be.fulfilled;
-                let val = await g_browser.executeSync(() => { return 10 });
+                const val = await g_browser.executeSync(() => { return 10 });
                 expect(val).to.be.equal(10);                
             }); 
 
             it('should execute the function and return the correct value if webdriver response is successful (3)', async function() {
-                let resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ARRAY;
+                const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ARRAY;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeSync(() => { return [1,2,3]; })).to.be.fulfilled;
-                let val = await g_browser.executeSync(() => { return [1,2,3] });
+                const val = await g_browser.executeSync(() => { return [1,2,3] });
                 expect(val.length).to.be.equal(3);              
             }); 
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
-                let resp = td.WD_EXECUTE_SYNC_RESPONSE.KO_ERROR;
+                const resp = td.WD_EXECUTE_SYNC_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.executeSync("return 0")).to.be.rejected;
             });  
@@ -318,34 +318,34 @@ export function generateBrowserTest(browserType : string) {
 
         describe('executeAsync', function () {
             it('should execute the function and return the correct value if webdriver response is successful (1)', async function() {
-                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_STRING;
+                const resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_STRING;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeAsync((done) => { done("hello"); })).to.be.fulfilled;
-                let val = await g_browser.executeAsync((done) => { done("hello"); });
+                const val = await g_browser.executeAsync((done) => { done("hello"); });
                 expect(val).to.be.equal("hello");
             }); 
 
             it('should execute the function and return the correct value if webdriver response is successful (2)', async function() {
-                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_NUMBER;
+                const resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_NUMBER;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeAsync((done) => { done(10); })).to.be.fulfilled;
-                let val = await g_browser.executeAsync((done) => { done(10); });
+                const val = await g_browser.executeAsync((done) => { done(10); });
                 expect(val).to.be.equal(10);                
             }); 
 
             it('should execute the function and return the correct value if webdriver response is successful (3)', async function() {
-                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_ARRAY;
+                const resp = td.WD_EXECUTE_ASYNC_RESPONSE.OK_ARRAY;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/async`).twice().reply(resp.code, resp.body, resp.headers);
                 //@ts-ignore
                 await expect(g_browser.executeAsync((done) => { done([1,2,3]); })).to.be.fulfilled;
-                let val = await g_browser.executeAsync((done) => { done([1,2,3]); });
+                const val = await g_browser.executeAsync((done) => { done([1,2,3]); });
                 expect(val.length).to.be.equal(3);              
             }); 
 
             it('should throw an error if the webdriver server return an error | Nock Only', async function () { 
-                let resp = td.WD_EXECUTE_ASYNC_RESPONSE.KO_ERROR;
+                const resp = td.WD_EXECUTE_ASYNC_RESPONSE.KO_ERROR;
                 nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/execute/async`).reply(resp.code, resp.body, resp.headers);                          
                 await expect(g_browser.executeAsync("return 0")).to.be.rejected;
             });  
@@ -362,13 +362,13 @@ export function generateBrowserTest(browserType : string) {
 
             describe('to', function () {
                 it('should navigate to the website page with no error if result is OK', async function() {
-                    let resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.fulfilled;
                 });
 
                 it('should navigate to the website page with no error several times', async function() {
-                    let resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP), 'first try').to.be.fulfilled;
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP_1), 'second try').to.be.fulfilled;
@@ -376,7 +376,7 @@ export function generateBrowserTest(browserType : string) {
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
-                    let resp = td.WD_NAVIGATE_TO_RESPONSE.KO;
+                    const resp = td.WD_NAVIGATE_TO_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP)).to.be.rejectedWith(/navigate/);
                 });
@@ -392,19 +392,19 @@ export function generateBrowserTest(browserType : string) {
             describe('getCurrentURL', function () {
                 beforeEach(async function () {
                     // Required for .navigate
-                    let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                     await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
                 });
     
                 it('should retreive the website URL with no error if result is OK', async function() {
-                    let resp = td.WD_NAVIGATE_CURRENTURL.OK;
+                    const resp = td.WD_NAVIGATE_CURRENTURL.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().getCurrentURL()).to.become(td.WD_WEBSITE_URL_HTTP);
                 });
     
                 it('should navigate to the website page with no error several times', async function() {
-                    let resp = td.WD_NAVIGATE_CURRENTURL.OK;
+                    const resp = td.WD_NAVIGATE_CURRENTURL.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().getCurrentURL(), 'first try').to.become(td.WD_WEBSITE_URL_HTTP);
                     await expect(g_browser.navigate().getCurrentURL(), 'second try').to.become(td.WD_WEBSITE_URL_HTTP);
@@ -412,7 +412,7 @@ export function generateBrowserTest(browserType : string) {
                 });
     
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
-                    let resp = td.WD_NAVIGATE_CURRENTURL.KO;
+                    const resp = td.WD_NAVIGATE_CURRENTURL.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/url`).twice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().getCurrentURL()).to.be.rejectedWith(/geturl/);
                 });
@@ -427,18 +427,18 @@ export function generateBrowserTest(browserType : string) {
             describe('refresh', function () {
                 beforeEach(async function () {
                     // Required for .navigate.to()
-                    let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                     await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
                 })
                 it('should refresh to the website page with no error if result is OK', async function() {
-                    let resp3 = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
+                    const resp3 = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/refresh`).reply(resp3.code, resp3.body, resp3.headers);
                     await expect(g_browser.navigate().refresh()).to.be.fulfilled;
                 });
 
                 it('should refresh to the website page with no error several times', async function() {
-                    let resp = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_REFRESH_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/refresh`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().refresh()).to.be.fulfilled;
                     await expect(g_browser.navigate().refresh()).to.be.fulfilled;
@@ -446,7 +446,7 @@ export function generateBrowserTest(browserType : string) {
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
-                    let resp = td.WD_NAVIGATE_REFRESH_RESPONSE.KO;
+                    const resp = td.WD_NAVIGATE_REFRESH_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/refresh`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().refresh()).to.be.rejectedWith(/refresh/);
                 });
@@ -461,18 +461,18 @@ export function generateBrowserTest(browserType : string) {
             describe('back', function () {
                 beforeEach(async function () {
                     // Required for .navigate.to()
-                    let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                     await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
                 })
                 it('should refresh go to the previews web page with no error if result is OK', async function() {
-                    let resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/back`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().back()).to.be.fulfilled;
                 });
 
                 it('should refresh to go back several times', async function() {
-                    let resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_BACK_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/back`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().back()).to.be.fulfilled;
                     await expect(g_browser.navigate().back()).to.be.fulfilled;
@@ -480,7 +480,7 @@ export function generateBrowserTest(browserType : string) {
                 });
 
                 it('should throw an error if the webdriver server return an error | Nock Only', async function() {
-                    let resp = td.WD_NAVIGATE_BACK_RESPONSE.KO;
+                    const resp = td.WD_NAVIGATE_BACK_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/back`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().back()).to.be.rejectedWith(/back/);
                 });
@@ -495,18 +495,18 @@ export function generateBrowserTest(browserType : string) {
             describe('forward', function () {
                 beforeEach(async function () {
                     // Required for .navigate.to()
-                    let resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                    const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
                     await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
                 })
                 it('should refresh go to the previews web page with no error if result is OK', async function() {
-                    let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/forward`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().forward()).to.be.fulfilled;
                 });
 
                 it('should refresh to go back several times', async function() {
-                    let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
+                    const resp = td.WD_NAVIGATE_FORWARD_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/forward`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().forward()).to.be.fulfilled;
                     await expect(g_browser.navigate().forward()).to.be.fulfilled;
@@ -514,7 +514,7 @@ export function generateBrowserTest(browserType : string) {
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
-                    let resp = td.WD_NAVIGATE_FORWARD_RESPONSE.KO;
+                    const resp = td.WD_NAVIGATE_FORWARD_RESPONSE.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/forward`).reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().forward()).to.be.rejectedWith(/forward/);
                 });
@@ -526,5 +526,27 @@ export function generateBrowserTest(browserType : string) {
                 });
             });        
         });
+
+        describe('getCookie', function() {
+            beforeEach(async function () {
+                // Required for .navigate.to()
+                const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
+            });
+
+        })
+
+        describe('cookies', function() {
+            describe('create', function() {
+            
+            })
+            describe('update', function() {
+            
+            })
+            describe('delete', function() {
+            
+            })
+        })
     });
 }

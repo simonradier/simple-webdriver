@@ -249,14 +249,17 @@ export class WebDriver {
             deleteAllCookies : () => {
                 return wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETEALL(session));
             },
-
+            screenshot : async () => {
+                const resp =  await wdapi.call<string>(this.serverURL, this._api.SCREENSHOT(session));
+                return resp.body.value;
+            },
             cookie : () => {
                 return {
                     create : async (cookie : Cookie) => {
                         return  wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
                     },
                     update : async (cookie : Cookie) => {
-                            await  wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
+                            await wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
                             await wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
                     },
                     delete : async (cookie : Cookie) => {
@@ -371,7 +374,7 @@ export class WebDriver {
     }
 
     public async start(browserType : BrowserType, capabilities : Capabilities = Capabilities.default) : Promise<Browser> {
-        const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(browserType, capabilities.headless));
+        const resp = await wdapi.call<SessionDef>(this.serverURL, this._api.SESSION_START(browserType, capabilities.args));
         let error : WebDriverResponseError;
 
         if (!resp.body.value) {

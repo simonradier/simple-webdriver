@@ -4,23 +4,20 @@ import { Logger } from "./utils/logger";
 import { WebDriverResponseError } from "./error";
 
 export async function call<T>(url : URL, request : RequestDef) {
-    return new Promise<httpclient.HttpResponse<ResponseDef<T>>>(async (resolve, reject) => {
-        Logger.trace(`Calling : ${ request.requestOptions.method } ${ url }${ request.path }`);
-        try {
-            const resp = await httpclient.call<ResponseDef<T>>(new URL(request.path, url.href).href, request.requestOptions, request.data);
-            Logger.debug(request);
-            Logger.debug(resp);
-            if (resp.statusCode !== 200 || (resp.body.status && resp.body.status !== 0)) {
-                Logger.error(resp.body)
-                reject(new WebDriverResponseError(resp));
-            } else {
-                resolve(resp);
-            }
-        } catch (e) {
-            reject(e);
+    Logger.trace(`Calling : ${ request.requestOptions.method } ${ url }${ request.path }`);
+    try {
+        const resp = await httpclient.call<ResponseDef<T>>(new URL(request.path, url.href).href, request.requestOptions, request.data);
+        Logger.debug(request);
+        Logger.debug(resp);
+        if (resp.statusCode !== 200) {
+            Logger.error(resp.body)
+            throw new WebDriverResponseError(resp);
+        } else {
+            return resp;
         }
-    })
-
+    } catch (e) {
+        throw(e);
+    }
 }
 
 export * from "./api/w3c"

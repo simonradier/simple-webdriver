@@ -259,7 +259,7 @@ export class WebDriver {
                         return  wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
                     },
                     update : async (cookie : Cookie) => {
-                            await  wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
+                            await wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
                             await wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
                     },
                     delete : async (cookie : Cookie) => {

@@ -2,10 +2,12 @@
 <html>
     <head>
         <title>WD2 Test Page</title>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     </head>
     <body>
-        <script>
-            browser.cookies.set({ name : "cookie1", value : "test"})
+        <script type="text/javascript">
+            Cookies.set('cookie1', 'hello')
+            Cookies.set('cookie2', 'hello')        
         </script>
         <h1>Hello</h1>
         <div id="id_1234">test id</div><br/>

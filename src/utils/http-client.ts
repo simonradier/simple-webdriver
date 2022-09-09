@@ -29,10 +29,14 @@ export async function call<T>(url : string, httpOptions : http.RequestOptions | 
             });
             res.on('end', () => {
                 const response = new HttpResponse<T>();
+                if (res.statusCode == 302 || res.statusCode == 303) {
+                    const err = new Error("HTTPError : Unsupported 302/303 redirection")
+                    reject(err);
+                }
                 response.statusCode = res.statusCode;
                 response.statusMessage = res.statusMessage
                 if (!res.headers || !(res.headers["content-type"] && res.headers["content-type"].includes("application/json"))) {
-                    const err = new Error("Incorrect HTTP header 'content-type', expected 'application/json'")
+                    const err = new Error("HTTPError : Incorrect HTTP header 'content-type', expected 'application/json'")
                     reject(err);
                 } else {
                     try {

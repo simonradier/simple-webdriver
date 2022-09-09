@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import nock from "nock";
+import { Cookie } from "../../src";
 import { Browser, BrowserType } from "../../src/browser";
 import { loggerConfiguration, LogLevel } from "../../src/utils/logger";
 import { Using, WebDriver } from "../../src/webdriver";
@@ -371,8 +372,8 @@ export function generateBrowserTest(browserType : string) {
                     const resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).thrice().reply(resp.code, resp.body, resp.headers);
                     await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP), 'first try').to.be.fulfilled;
-                    await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP_1), 'second try').to.be.fulfilled;
-                    await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP_2), 'third try').to.be.fulfilled;
+                    await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP), 'second try').to.be.fulfilled;
+                    await expect(g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP), 'third try').to.be.fulfilled;
                 });
 
                 it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
@@ -527,25 +528,140 @@ export function generateBrowserTest(browserType : string) {
             });        
         });
 
-        describe('getCookie', function() {
+
+
+        describe('cookies', function() {
             beforeEach(async function () {
                 // Required for .navigate.to()
-                const resp3 = td.WD_NAVIGATE_TO_RESPONSE.OK;
-                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp3.code, resp3.body, resp3.headers);
+                const resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
                 await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);
             });
 
-        })
+            describe('get', function() {
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.cookie().get("cookie1")}).to.throw(/closed/);
+                });
 
-        describe('cookies', function() {
-            describe('create', function() {
-            
+                it('should be possible to retreive an existing cookie 1/2', async function() {
+                    const resp = td.WD_COOKIE_GET.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp.code, resp.body, resp.headers);
+                    const result = await g_browser.cookie().get("cookie1");
+                    expect(result.name).to.be.equal(resp.body.value.name)
+                    expect(result.value).to.be.equal(resp.body.value.value)                                  
+                });
+
+                it('should be possible to retreive an existing cookie 2/2', async function() {
+                    const resp = td.WD_COOKIE_GET.OK_2;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie2`).reply(resp.code, resp.body, resp.headers);
+                    const result = await g_browser.cookie().get("cookie2");
+                    expect(result.name).to.be.equal(resp.body.value.name)
+                    expect(result.value).to.be.equal(resp.body.value.value)                                  
+                });
+
+                it('should throw an error if the cookie does not exist', async function() {
+                    const resp = td.WD_COOKIE_GET.KO_ERROR;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie3`).reply(resp.code, resp.body, resp.headers);
+                    expect(g_browser.cookie().get("cookie3")).to.be.rejectedWith(/no such cookie/);                                
+                });
             })
+
+            describe('getAll', function() {
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.cookie().get("cookie1")}).to.throw(/closed/);
+                });
+
+                it('should be possible to retreive existing cookies', async function() {
+                    const resp = td.WD_COOKIE_GETALL.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
+                    const result = await g_browser.cookie().getAll()
+                    expect(result.length).to.be.equal(td.WD_COOKIE_GETALL.OK.body.value.length)
+                    expect(result[0].name).to.be.oneOf([td.WD_COOKIE_GETALL.OK.body.value[0].name, td.WD_COOKIE_GETALL.OK.body.value[1].name])
+                    expect(result[0].value).to.be.oneOf([td.WD_COOKIE_GETALL.OK.body.value[0].value , td.WD_COOKIE_GETALL.OK.body.value[1].value])
+                    expect(result[1].name).to.be.oneOf([td.WD_COOKIE_GETALL.OK.body.value[0].name , td.WD_COOKIE_GETALL.OK.body.value[1].name])                       
+                    expect(result[1].value).to.be.oneOf([td.WD_COOKIE_GETALL.OK.body.value[0].value , td.WD_COOKIE_GETALL.OK.body.value[1].value])
+
+                });
+            })
+
+            describe('create', function() {
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    let cookie = new Cookie(g_browser, { name : "test", value : "test"})
+                    expect(() => {g_browser.cookie().create(cookie)}).to.throw(/closed/);
+                }); 
+
+                it('should be possible to create a cookie and retreive it', async function() {
+                    const resp = td.WD_COOKIE_CREATE.OK;
+                    const resp2 = td.WD_COOKIE_GET.OK_3;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
+                    expect(g_browser.cookie().create(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie3`).reply(resp2.code, resp2.body, resp2.headers);
+                    const result = await g_browser.cookie().get("cookie3");
+                    expect(result.name).to.be.equal(resp2.body.value.name)
+                    expect(result.value).to.be.equal(resp2.body.value.value)                                  
+                });
+            })
+
             describe('update', function() {
-            
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    let cookie = new Cookie(g_browser, { name : "test", value : "test"})
+                    expect(() => {g_browser.cookie().update(cookie)}).to.throw(/closed/);
+                });
+
+                it('should be possible to update an existing cookie and retreive its new value', async function() {
+                    const resp = td.WD_COOKIE_CREATE.OK;
+                    const resp2 = td.WD_COOKIE_GET.OK_UPDATE;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
+                    expect(g_browser.cookie().create(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
+                    const result = await g_browser.cookie().get("cookie1");
+                    expect(result.name).to.be.equal(resp2.body.value.name)
+                    expect(result.value).to.be.equal(resp2.body.value.value)                                  
+                });
+
+
             })
             describe('delete', function() {
-            
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.cookie().delete("cookie1")}).to.throw(/closed/);
+                });
+
+                it('should be possible to delete a cookie', async function() {
+                    const resp = td.WD_COOKIE_DELETE.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp.code, resp.body, resp.headers);
+                    expect(g_browser.cookie().delete('cookie1')).to.be.fulfilled
+                    const resp2 = td.WD_COOKIE_GET.KO_ERROR;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
+                    expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
+                });
+
+            })
+            describe('deleteAll', function() {
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.cookie().deleteAll()}).to.throw(/closed/);
+                });
+
+                it('should be possible to delete all cookies', async function() {
+                    const resp = td.WD_COOKIE_DELETE_ALL.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
+                    expect(g_browser.cookie().deleteAll()).to.be.fulfilled
+                    const resp2 = td.WD_COOKIE_GET.KO_ERROR;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
+                    expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
+                });
             })
         })
     });

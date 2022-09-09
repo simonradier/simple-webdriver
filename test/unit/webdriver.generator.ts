@@ -73,6 +73,7 @@ export function generateWebDriverTest(browserType : string) {
                 driver = new WebDriver("http://fake-server.local");
                 await expect(driver.start(BrowserType[browserType], Capabilities.default)).to.be.rejectedWith(/ENOTFOUND|EAI_AGAIN/);
             }).timeout(10000);
+            
             it('should throw an exception if the server is not a webdriver server 1/6 | Nock Only', async function () { 
                 let resp = td.WD_START_SESSION_RESPONSE.KO_HTML;
                 //@ts-ignore

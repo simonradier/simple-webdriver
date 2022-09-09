@@ -10,25 +10,25 @@ export interface CookieDef {
     /**
      * The cookie path. Defaults to "/" if omitted when adding a cookie.
      */
-    path : string,
+    path? : string,
     /**
      * The domain the cookie is visible to. Defaults to the current browsing context’s active document’s URL domain if omitted when adding a cookie.
      */
-    domain : string,
+    domain? : string,
     /**
      * Whether the cookie is a secure cookie. Defaults to false if omitted when adding a cookie.
      */
-    secure : boolean,
+    secure? : boolean,
     /**
      * Whether the cookie is an HTTP only cookie. Defaults to false if omitted when adding a cookie.
      */
-    httpOnly : boolean,
+    httpOnly? : boolean,
     /**
      * When the cookie expires, specified in seconds since Unix Epoch. Must not be set if omitted when adding a cookie.
      */
-    expiry : number,
+    expiry? : number,
     /**
      * Whether the cookie applies to a SameSite policy. Defaults to None if omitted when adding a cookie. Can be set to either Lax or Strict.
      */
-    sameSite : string, // "Lax or String"
+    sameSite? : "Lax" | "Strict", // "Lax or Strict"
 }

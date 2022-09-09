@@ -31,11 +31,7 @@ export const WD_SERVER_URL_HTTPS = {
     Safari : "https://localhost:9315",
 }
 
-export const WD_WEBSITE_URL_HTTP =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/"
-
-export const WD_WEBSITE_URL_HTTP_1 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test1.html"
-
-export const WD_WEBSITE_URL_HTTP_2 =  "https://simonradier.github.io/node-red-contrib-selenium-wd2/test/test2.html"
+export const WD_WEBSITE_URL_HTTP =  "https://simonradier.github.io/simple-webdriver/test/html/"
 
 
 export const WD_SESSION_ID = "session-test-id-1337"
@@ -334,14 +330,14 @@ export const WD_NAVIGATE_CURRENTURL = {
     OK_1 : {
         code : 200,
         body : {
-            "value" : WD_WEBSITE_URL_HTTP_1
+            "value" : WD_WEBSITE_URL_HTTP
         },
         headers : { "Content-Type" : "application/json" }
     },
     OK_2 : {
         code : 200,
         body : {
-            "value" : WD_WEBSITE_URL_HTTP_2
+            "value" : WD_WEBSITE_URL_HTTP
         },
         headers : { "Content-Type" : "application/json" }
     },
@@ -940,7 +936,7 @@ export const  WD_WINDOW_CLOSE = {
     }
 }
 
-export const  WD_COOKIE_GET = {
+export const WD_COOKIE_GET = {
     OK : {
         code : 200,
         body : {
@@ -951,7 +947,37 @@ export const  WD_COOKIE_GET = {
         },
         headers : { "Content-Type" : "application/json"}
     },
-    KO : {
+    OK_2 : {
+        code : 200,
+        body : {
+            "value" : {
+                "name" : "cookie2",
+                "value" :  "hello"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_3 : {
+        code : 200,
+        body : {
+            "value" : {
+                "name" : "cookie3",
+                "value" :  "toto"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_UPDATE : {
+        code : 200,
+        body : {
+            "value" : {
+                "name" : "cookie1",
+                "value" :  "toto"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO_ERROR : {
         code : 404,
         body : {
             "value" : { 
@@ -964,7 +990,7 @@ export const  WD_COOKIE_GET = {
     }
 }
 
-export const  WD_COOKIE_GETALL = {
+export const WD_COOKIE_GETALL = {
     OK : {
         code : 200,
         body : {
@@ -975,7 +1001,7 @@ export const  WD_COOKIE_GETALL = {
         },
         headers : { "Content-Type" : "application/json"}
     },
-    KO : {
+    KO_ERROR : {
         code : 404,
         body : {
             "value" : { 
@@ -988,9 +1014,68 @@ export const  WD_COOKIE_GETALL = {
     }
 }
 
+export const WD_COOKIE_DELETE = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO_ERROR : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error" : "no such cookie", 
+                "message" : "no such cookie",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }  
+}
 
+export const WD_COOKIE_DELETE_ALL = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO_ERROR : {
+        code : 400,
+        body : {
+            "value" : { 
+                "error" : "no such window", 
+                "message" : "no such window",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }  
+}
 
-
-
-
-
+export const WD_COOKIE_CREATE = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO_ERROR : {
+        code : 400,
+        body : {
+            "value" : { 
+                "error" : "no such window", 
+                "message" : "no such window",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }  
+}

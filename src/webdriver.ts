@@ -154,12 +154,8 @@ export class WebDriver {
              * @returns void
              */
             stop : async () => {
-                if (!browser && !browser.session) {
-                    throw (new WebDriverError("start must be called first"))
-                } else {
-                    await wdapi.call<any>(this.serverURL, this._api.SESSION_STOP(session));
-                    delete WebDriver._onGoingSessions[browser.session];
-                }
+                await wdapi.call<any>(this.serverURL, this._api.SESSION_STOP(session));
+                delete WebDriver._onGoingSessions[browser.session];
             },
             findElement : async (using : Using, value : string, timeout : number = null, multiple : boolean = false, fromElement : Element = null) => {
                 let timer = true;
@@ -236,34 +232,32 @@ export class WebDriver {
                     }
                 }
             },
-            
-            getCookie : async (name)  => {
-                const resp = await wdapi.call<CookieDef>(this.serverURL, this._api.COOKIE_GET(session, name));
-                return resp.body.value;
-            },
-
-            getAllCookies : async () => {
-                const resp = await wdapi.call<CookieDef[]>(this.serverURL, this._api.COOKIE_GETALL(session));
-                return resp.body.value;           
-            },
-            deleteAllCookies : () => {
-                return wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETEALL(session));
-            },
             screenshot : async () => {
                 const resp =  await wdapi.call<string>(this.serverURL, this._api.SCREENSHOT(session));
                 return resp.body.value;
             },
             cookie : () => {
                 return {
+                    get : async (name)  => {
+                        const resp = await wdapi.call<CookieDef>(this.serverURL, this._api.COOKIE_GET(session, name));
+                        return resp.body.value;
+                    },
+
+                    getAll : async () => {
+                        const resp = await wdapi.call<CookieDef[]>(this.serverURL, this._api.COOKIE_GETALL(session));
+                        return resp.body.value;           
+                    },
                     create : async (cookie : Cookie) => {
-                        return  wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
+                        return  wdapi.call<void>(this.serverURL, this._api.COOKIE_CREATE(session, cookie));
                     },
                     update : async (cookie : Cookie) => {
-                            await wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
-                            await wdapi.call<void>(this.serverURL, this._api.COOKIE_ADD(session, cookie));
+                            await wdapi.call<void>(this.serverURL, this._api.COOKIE_CREATE(session, cookie));
                     },
-                    delete : async (cookie : Cookie) => {
-                        return  wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, cookie.name));
+                    delete : async (name : string) => {
+                        return  wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETE(session, name));
+                    },
+                    deleteAll : () => {
+                        return wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETEALL(session));
                     },
                 }
             }

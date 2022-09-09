@@ -413,12 +413,12 @@ export class W3C implements WDAPIDef {
         return result;
     }
 
-    COOKIE_ADD(sessionId: string, cookie : CookieDef): RequestDef {
+    COOKIE_CREATE(sessionId: string, cookie : CookieDef): RequestDef {
         const result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/cookie`;
         result.requestOptions.method = "POST";
-        result.data = cookie;
+        result.data = {cookie : cookie};
         return result;
     }
 

@@ -44,7 +44,7 @@ export interface WDAPIDef {
     EXECUTE_ASYNC(sessionId: string, script: string, ...args: any[]): RequestDef;
     COOKIE_GETALL(sessionId: string): RequestDef;
     COOKIE_GET(sessionId: string, name: string): RequestDef;
-    COOKIE_ADD(sessionId: string, cookie : CookieDef): RequestDef;
+    COOKIE_CREATE(sessionId: string, cookie : CookieDef): RequestDef;
     COOKIE_DELETE(sessionId: string, name: string): RequestDef;
     COOKIE_DELETEALL(sessionId: string): RequestDef;
     ALERT_ACCEPT(sessionId: string): RequestDef;

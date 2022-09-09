@@ -9,13 +9,8 @@ export class Cookie implements CookieDef {
     public readonly secure: boolean;
     public readonly httpOnly: boolean;
     public expiry: number;
-    public readonly sameSite: string;
+    public readonly sameSite: "Lax" | "Strict";
     public readonly browser: Browser;
-
-    public get session () : string {
-        return this.browser.session;
-    };
-
 
     constructor (browser : Browser, cookie : CookieDef) {
         this.name = cookie.name;
@@ -40,7 +35,7 @@ export class Cookie implements CookieDef {
     }
 
     public async delete () {
-        await this.browser.cookie().delete(this);
+        await this.browser.cookie().delete(this.name);
     }
 
 }

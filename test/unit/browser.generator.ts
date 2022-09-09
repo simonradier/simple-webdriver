@@ -14,7 +14,7 @@ export function generateBrowserTest(browserType : string) {
         let g_browser : Browser;
         before(async function () {
             // Deactivate WebDriver Logs
-            loggerConfiguration.logLevel = LogLevel.Trace;
+            loggerConfiguration.logLevel = LogLevel.Debug;
             // Clean previous sessions
             await WebDriver.cleanSessions();
             g_driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
@@ -564,7 +564,7 @@ export function generateBrowserTest(browserType : string) {
                 it('should throw an error if the cookie does not exist', async function() {
                     const resp = td.WD_COOKIE_GET.KO_ERROR;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie3`).reply(resp.code, resp.body, resp.headers);
-                    expect(g_browser.cookie().get("cookie3")).to.be.rejectedWith(/no such cookie/);                                
+                    await expect(g_browser.cookie().get("cookie3")).to.be.rejectedWith(/no such cookie/);                                
                 });
             })
 
@@ -600,7 +600,7 @@ export function generateBrowserTest(browserType : string) {
                     const resp = td.WD_COOKIE_CREATE.OK;
                     const resp2 = td.WD_COOKIE_GET.OK_3;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
-                    expect(g_browser.cookie().create(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
+                    await expect(g_browser.cookie().create(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie3`).reply(resp2.code, resp2.body, resp2.headers);
                     const result = await g_browser.cookie().get("cookie3");
                     expect(result.name).to.be.equal(resp2.body.value.name)
@@ -621,7 +621,7 @@ export function generateBrowserTest(browserType : string) {
                     const resp = td.WD_COOKIE_CREATE.OK;
                     const resp2 = td.WD_COOKIE_GET.OK_UPDATE;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
-                    expect(g_browser.cookie().create(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
+                    await expect(g_browser.cookie().update(new Cookie(g_browser, { name : resp2.body.value.name , value : resp2.body.value.value }))).to.be.fulfilled
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
                     const result = await g_browser.cookie().get("cookie1");
                     expect(result.name).to.be.equal(resp2.body.value.name)
@@ -640,10 +640,10 @@ export function generateBrowserTest(browserType : string) {
                 it('should be possible to delete a cookie', async function() {
                     const resp = td.WD_COOKIE_DELETE.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp.code, resp.body, resp.headers);
-                    expect(g_browser.cookie().delete('cookie1')).to.be.fulfilled
+                    await expect(g_browser.cookie().delete('cookie1')).to.be.fulfilled
                     const resp2 = td.WD_COOKIE_GET.KO_ERROR;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
-                    expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
+                    await expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
                 });
 
             })
@@ -657,10 +657,10 @@ export function generateBrowserTest(browserType : string) {
                 it('should be possible to delete all cookies', async function() {
                     const resp = td.WD_COOKIE_DELETE_ALL.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).delete(`/session/${td.WD_SESSION_ID}/cookie`).reply(resp.code, resp.body, resp.headers);
-                    expect(g_browser.cookie().deleteAll()).to.be.fulfilled
+                    await expect(g_browser.cookie().deleteAll()).to.be.fulfilled
                     const resp2 = td.WD_COOKIE_GET.KO_ERROR;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).get(`/session/${td.WD_SESSION_ID}/cookie/cookie1`).reply(resp2.code, resp2.body, resp2.headers);
-                    expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
+                    await expect(g_browser.cookie().get('cookie1')).to.be.rejectedWith('no such cookie')
                 });
             })
         })

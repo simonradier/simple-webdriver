@@ -238,7 +238,7 @@ export class WebDriver {
             },
             cookie : () => {
                 return {
-                    get : async (name)  => {
+                    get : async (name : string)  => {
                         const resp = await wdapi.call<CookieDef>(this.serverURL, this._api.COOKIE_GET(session, name));
                         return resp.body.value;
                     },

@@ -37,7 +37,7 @@
     "@types/chai": "^4.2.18",
     "@types/chai-as-promised": "^7.1.4",
     "@types/mocha": "^8.2.0",
-    "@types/node": "18.7.14",
+    "@types/node": "18.7.21",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "chromedriver": "^105.0.0",

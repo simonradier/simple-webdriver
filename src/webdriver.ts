@@ -247,10 +247,10 @@ export class WebDriver {
                         const resp = await wdapi.call<CookieDef[]>(this.serverURL, this._api.COOKIE_GETALL(session));
                         return resp.body.value;           
                     },
-                    create : async (cookie : Cookie) => {
+                    create : async (cookie : CookieDef) => {
                         return  wdapi.call<void>(this.serverURL, this._api.COOKIE_CREATE(session, cookie));
                     },
-                    update : async (cookie : Cookie) => {
+                    update : async (cookie : CookieDef) => {
                             await wdapi.call<void>(this.serverURL, this._api.COOKIE_CREATE(session, cookie));
                     },
                     delete : async (name : string) => {

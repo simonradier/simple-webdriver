@@ -30,5 +30,5 @@ export interface CookieDef {
     /**
      * Whether the cookie applies to a SameSite policy. Defaults to None if omitted when adding a cookie. Can be set to either Lax or Strict.
      */
-    sameSite? : "Lax" | "Strict", // "Lax or Strict"
+    sameSite? : "None" | "Lax" | "Strict", // "Lax or Strict"
 }

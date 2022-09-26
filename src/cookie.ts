@@ -9,7 +9,7 @@ export class Cookie implements CookieDef {
     public readonly secure: boolean;
     public readonly httpOnly: boolean;
     public expiry: number;
-    public readonly sameSite: "Lax" | "Strict";
+    public readonly sameSite: "None" | "Lax" | "Strict";
     public readonly browser: Browser;
 
     constructor (browser : Browser, cookie : CookieDef) {

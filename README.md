@@ -1,3 +1,11 @@
+<p align="center">
+[![Coverage Status](https://coveralls.io/repos/github/simonradier/simple-webdriver/badge.svg?branch=refs/heads/main)](https://coveralls.io/github/simonradier/simple-webdriver?branch=refs/heads/main)
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=simonradier_simple-webdriver&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=simonradier_simple-webdriver)
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=simonradier_simple-webdriver&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=simonradier_simple-webdriver)
+</p>
+
 # simple-webdriver
 A webdriver javascript bindings written in typescript with no dependency
 

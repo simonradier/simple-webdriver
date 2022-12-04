@@ -31,6 +31,16 @@ export const WD_SERVER_URL_HTTPS = {
     Safari : "https://localhost:9315",
 }
 
+export const WD_FRAME_INFO = {
+    "number1" : 1,
+    "number2" : 2,
+    "number3" : 3,
+    "top-context" : null,
+    "id1" : "frame-test1",
+    "id2" : "frame-test2",
+    "id3" : "frame-unknown"
+}
+
 export const WD_WEBSITE_URL_HTTP =  "https://simonradier.github.io/simple-webdriver/test/html/"
 
 
@@ -1068,6 +1078,66 @@ export const WD_COOKIE_CREATE = {
         headers : { "Content-Type" : "application/json"}
     },
     KO_ERROR : {
+        code : 400,
+        body : {
+            "value" : { 
+                "error" : "no such window", 
+                "message" : "no such window",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }  
+}
+
+export const WD_FRAME_SWITCH = {
+    OK_1 : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_2 : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    OK_FRAME_ID : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
+        code : 400,
+        body : {
+            "value" : { 
+                "error" : "no such frame", 
+                "message" : "no such frame",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
+    }  
+}
+
+export const WD_FRAME_PARENT = {
+    OK : {
+        code : 200,
+        body : {
+            //@ts-ignore
+            value : null
+        },
+        headers : { "Content-Type" : "application/json"}
+    },
+    KO : {
         code : 400,
         body : {
             "value" : { 

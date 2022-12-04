@@ -58,6 +58,7 @@ export function generateWebDriverTest(browserType : string) {
         });
 
         describe('start', function (){
+            
             beforeEach(async function () {
                 // Required to manage a failure in start in case of retry. Mostly to support Firefox unstability
                 await WebDriver.cleanSessions();
@@ -77,7 +78,7 @@ export function generateWebDriverTest(browserType : string) {
             it('should throw an exception if the server is not a webdriver server 1/6 | Nock Only', async function () { 
                 let resp = td.WD_START_SESSION_RESPONSE.KO_HTML;
                 //@ts-ignore
-                nock(td.WD_SERVER_URL_HTTP[browserType]).post("/session").reply(resp.code, resp.body, resp.headers);
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post("/session").reply(resp.code, resp.body, { "Content-Type" : "test"});
                 let driver : WebDriver;
                 driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType]);
                 await expect(driver.start(BrowserType[browserType], Capabilities.default)).to.be.rejectedWith(/Incorrect HTTP header/);

@@ -528,7 +528,93 @@ export function generateBrowserTest(browserType : string) {
             });        
         });
 
+        describe('frame', function() {
+            beforeEach(async function () {
+                const resp = td.WD_NAVIGATE_TO_RESPONSE.OK;
+                nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/url`).reply(resp.code, resp.body, resp.headers);
+                await g_browser.navigate().to(td.WD_WEBSITE_URL_HTTP);                
+            });
 
+            describe('switch', function() {
+
+                it('should be possible to switch to a frame with its number 1/2', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_1;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.number1)).to.be.fulfilled;
+                });
+
+                it('should be possible to switch to a frame with its number 2/2', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_2;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.number2)).to.be.fulfilled;
+                });
+
+                it('should not be possible to switch to a frame with an unknown number', async function() {
+                    const resp = td.WD_FRAME_SWITCH.KO;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.number3)).to.be.rejectedWith(/no such frame/);
+                });
+
+                it('should be possible to switch to a frame with its id 1/2', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_FRAME_ID;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id1)).to.be.fulfilled;
+                });
+
+                it('should be possible to switch to a frame with its id 2/2', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_FRAME_ID;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id2)).to.be.fulfilled;
+                });
+
+                it('should not be possible to switch to a frame with an unknown ids', async function() {
+                    const resp = td.WD_FRAME_SWITCH.KO;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id3)).to.be.rejectedWith(/no such frame/);
+                });
+
+                it('should be possible to switch to the top-context with the null value', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_1;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO["top-context"])).to.be.fulfilled;
+                });
+
+                it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
+                    const resp = td.WD_FRAME_SWITCH.KO;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id1)).to.be.rejectedWith(/no such frame/);
+                });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.navigate().forward()}).to.throw(/closed/);
+                });
+            });
+            describe('parent', function() {
+
+                it('should be possible to switch to a parent frame with', async function() {
+                    const resp = td.WD_FRAME_SWITCH.OK_1;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id1)).to.be.fulfilled;
+                    const resp2 = td.WD_FRAME_PARENT.OK;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame/parent`).reply(resp2.code, resp2.body, resp2.headers);
+                    await expect(g_browser.frame().parent()).to.be.fulfilled;
+                });
+
+                it('should thrown an error if the webdriver server return an error | Nock Only', async function() {
+                    const resp = td.WD_FRAME_PARENT.KO;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame/parent`).reply(resp.code, resp.body, resp.headers);
+                    await expect(g_browser.frame().parent()).to.be.rejectedWith(/no such window/);
+                });
+
+                it('should throw an error if browser is closed', async function() {
+                    //@ts-ignore required for test purpose
+                    g_browser._closed = true;
+                    expect(() => {g_browser.frame().parent()}).to.throw(/closed/);
+                });
+            });
+        });
 
         describe('cookies', function() {
             beforeEach(async function () {

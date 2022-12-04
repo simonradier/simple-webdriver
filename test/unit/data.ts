@@ -1125,6 +1125,17 @@ export const WD_FRAME_SWITCH = {
             }
         },
         headers : { "Content-Type" : "application/json"}       
+    },
+    KO_ELEM : {
+        code : 404,
+        body : {
+            "value" : { 
+                "error" : "no such element", 
+                "message" : "no such element",
+                "stacktrace" : "this is a stack\ntrace"
+            }
+        },
+        headers : { "Content-Type" : "application/json"}       
     }  
 }
 

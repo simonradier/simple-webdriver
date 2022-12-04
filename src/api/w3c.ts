@@ -1,3 +1,4 @@
+import { Element } from "../element";
 import { WDAPIDef, RequestDef } from "../interface";
 import { CookieDef } from "../interface/cookie";
 import { Logger } from "../utils/logger";
@@ -50,7 +51,7 @@ export class W3C implements WDAPIDef {
             }
         }
         result.data.capabilities.alwaysMatch[browserOptions] = { args };
-        //result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
+        result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
         result.path = "session";
         result.requestOptions.method = "POST"
         return result;
@@ -218,12 +219,18 @@ export class W3C implements WDAPIDef {
         return result;
     }
 
-    FRAME_SWITCH(sessionId: string | number | null, frameId: string): RequestDef {
+    FRAME_SWITCH(sessionId: string, frameId: string | number | null): RequestDef {
         const result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/frame`;
-        result.requestOptions.method = "POST"
-        result.data = { id: frameId }
+        result.requestOptions.method = "POST";
+        if (typeof frameId === "string") // element can be string alone but me be wrapped
+            result.data = { id: { 
+                'element-6066-11e4-a52e-4f735466cecf' : frameId
+                } 
+            }
+        else
+            result.data = { id: frameId }
         return result;
     }
 

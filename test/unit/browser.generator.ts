@@ -556,21 +556,29 @@ export function generateBrowserTest(browserType : string) {
                 });
 
                 it('should be possible to switch to a frame with its id 1/2', async function() {
-                    const resp = td.WD_FRAME_SWITCH.OK_FRAME_ID;
-                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
-                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id1)).to.be.fulfilled;
+                    const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
+                    //@ts-ignore
+                    const element = await g_browser.findElement(Using["id"], td.WD_FRAME_INFO.id1);
+                    const resp2 = td.WD_FRAME_SWITCH.OK_FRAME_ID;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp2.code, resp2.body, resp2.headers);
+                    await expect(g_browser.frame().switch(element.toString())).to.be.fulfilled;
                 });
 
                 it('should be possible to switch to a frame with its id 2/2', async function() {
-                    const resp = td.WD_FRAME_SWITCH.OK_FRAME_ID;
-                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
-                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id2)).to.be.fulfilled;
+                    const resp = td.WD_EXECUTE_SYNC_RESPONSE.OK_ELEMENT;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/execute/sync`).reply(resp.code, resp.body, resp.headers);
+                    //@ts-ignore
+                    const element = await g_browser.findElement(Using["id"], td.WD_FRAME_INFO.id2);
+                    const resp2 = td.WD_FRAME_SWITCH.OK_FRAME_ID;
+                    nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp2.code, resp2.body, resp2.headers);
+                    await expect(g_browser.frame().switch(element.toString())).to.be.fulfilled;
                 });
 
                 it('should not be possible to switch to a frame with an unknown ids', async function() {
                     const resp = td.WD_FRAME_SWITCH.KO;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
-                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id3)).to.be.rejectedWith(/no such frame/);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id3)).to.be.rejectedWith(/no such element/);
                 });
 
                 it('should be possible to switch to the top-context with the null value', async function() {
@@ -596,7 +604,7 @@ export function generateBrowserTest(browserType : string) {
                 it('should be possible to switch to a parent frame with', async function() {
                     const resp = td.WD_FRAME_SWITCH.OK_1;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
-                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id1)).to.be.fulfilled;
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.number1)).to.be.fulfilled;
                     const resp2 = td.WD_FRAME_PARENT.OK;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame/parent`).reply(resp2.code, resp2.body, resp2.headers);
                     await expect(g_browser.frame().parent()).to.be.fulfilled;

@@ -32,9 +32,9 @@ export const WD_SERVER_URL_HTTPS = {
 }
 
 export const WD_FRAME_INFO = {
-    "number1" : 1,
-    "number2" : 2,
-    "number3" : 3,
+    "number1" : 0,
+    "number2" : 1,
+    "number3" : 2,
     "top-context" : null,
     "id1" : "frame-test1",
     "id2" : "frame-test2",

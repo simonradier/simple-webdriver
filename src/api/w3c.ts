@@ -51,7 +51,7 @@ export class W3C implements WDAPIDef {
             }
         }
         result.data.capabilities.alwaysMatch[browserOptions] = { args };
-        result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
+        //result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
         result.path = "session";
         result.requestOptions.method = "POST"
         return result;

@@ -35,7 +35,8 @@ export async function call<T>(url : string, httpOptions : http.RequestOptions | 
                 }
                 response.statusCode = res.statusCode;
                 response.statusMessage = res.statusMessage
-                if (!res.headers || !(res.headers["content-type"] && res.headers["content-type"].includes("application/json"))) {
+                const contentType = res?.headers["content-type"] ?? res?.headers["Content-Type"]
+                if (!(contentType?.includes("application/json"))) {
                     const err = new Error("HTTPError : Incorrect HTTP header 'content-type', expected 'application/json'")
                     reject(err);
                 } else {

@@ -143,6 +143,10 @@ export class Browser {
         return this._webdriver.browser(this).screenshot();
     }
 
+    public frame() {
+        return this._webdriver.browser(this).frame();
+    }
+
     /**
      * 
      */

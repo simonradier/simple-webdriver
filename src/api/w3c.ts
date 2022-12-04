@@ -218,7 +218,7 @@ export class W3C implements WDAPIDef {
         return result;
     }
 
-    FRAME_SWITCH(sessionId: string, frameId: string): RequestDef {
+    FRAME_SWITCH(sessionId: string | number | null, frameId: string): RequestDef {
         const result = new WebDriverRequest();
         W3C._initHttpOptions(result);
         result.path = `session/${sessionId}/frame`;

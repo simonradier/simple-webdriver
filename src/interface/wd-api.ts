@@ -21,7 +21,7 @@ export interface WDAPIDef {
     WINDOW_CLOSE(sessionId: string): RequestDef;
     WINDOW_SWITCH(sessionId: string, handle : string): RequestDef;
     SCREENSHOT(sessionId: string): RequestDef;
-    FRAME_SWITCH(sessionId: string, frameId: string): RequestDef;
+    FRAME_SWITCH(sessionId: string, frameId: string | number | null): RequestDef;
     FRAME_TOPARENT(sessionId: string): RequestDef;
     FINDELEMENT(sessionId: string, using: string, value: string): RequestDef;
     FINDELEMENTS(sessionId: string, using: string, value: string): RequestDef;

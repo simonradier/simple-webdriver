@@ -236,6 +236,16 @@ export class WebDriver {
                 const resp =  await wdapi.call<string>(this.serverURL, this._api.SCREENSHOT(session));
                 return resp.body.value;
             },
+            frame : () => {
+                return {
+                    switch : async (frameId : string | number | null) => {
+                        return wdapi.call<void>(this._serverURL, this._api.FRAME_SWITCH(session, frameId));
+                    },
+                    parent : async () => {
+                        return wdapi.call<void>(this.serverURL, this._api.FRAME_TOPARENT(session));
+                    }
+                }
+            },
             cookie : () => {
                 return {
                     get : async (name : string)  => {

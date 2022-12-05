@@ -1,5 +1,5 @@
 export interface TimeoutsDef {
-    implicit : number;
-    pageLoad : number;
-    script : number;
+  implicit: number
+  pageLoad: number
+  script: number
 }

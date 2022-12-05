@@ -1,5 +1,5 @@
 export interface ErrorDef {
-    error : string,
-    message : string,
-    stacktrace : string
+  error: string
+  message: string
+  stacktrace: string
 }

@@ -1,8 +1,8 @@
 {
-    "mochaExplorer.files": "test/unit/**/*.ts",
-    "mochaExplorer.require":"ts-node/register",
-    "mochaExplorer.timeout": 10000,
-    /*"mochaExplorer.env": {
+  "mochaExplorer.files": "test/unit/**/*.ts",
+  "mochaExplorer.require": "ts-node/register",
+  "mochaExplorer.timeout": 10000
+  /*"mochaExplorer.env": {
         "NOCK_OFF" : "true"
     }*/
 }

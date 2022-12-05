@@ -1,99 +1,103 @@
-import { WebDriver, Browser } from "./swd"
-import { Using } from "./webdriver";
+import { WebDriver, Browser } from './swd'
+import { Using } from './webdriver'
 
 export class Element {
+  public readonly browser: Browser
+  public readonly 'element-6066-11e4-a52e-4f735466cecf': string
 
-    public readonly browser : Browser
-    public readonly "element-6066-11e4-a52e-4f735466cecf" : string
+  private _driver: WebDriver
 
-    private _driver : WebDriver;
+  public get session() {
+    return this.browser.session
+  }
 
-    public get session() {
-        return this.browser.session;
-    }
+  public get ELEMENT() {
+    return this['element-6066-11e4-a52e-4f735466cecf']
+  }
 
-    public get ELEMENT () {
-        return this["element-6066-11e4-a52e-4f735466cecf"];
-    }
+  public constructor(elementID: string, browser: Browser, driver: WebDriver) {
+    this['element-6066-11e4-a52e-4f735466cecf'] = elementID
+    this._driver = driver
+    this.browser = browser
+  }
 
-    public constructor (elementID : string, browser : Browser, driver : WebDriver) {
-        this["element-6066-11e4-a52e-4f735466cecf"] = elementID;
-        this._driver = driver;
-        this.browser = browser;
-    }
+  public click(): Promise<void> {
+    return this._driver.element(this).click()
+  }
 
+  public getAttribute(attributeName: string): Promise<string> {
+    return this._driver.element(this).getAttribute(attributeName)
+  }
 
-    public click() : Promise<void> {
-        return  this._driver.element(this).click();
-    }
+  public getProperty(propertyName: string): Promise<string> {
+    return this._driver.element(this).getProperty(propertyName)
+  }
 
-    public getAttribute(attributeName : string) : Promise<string> {
-        return this._driver.element(this).getAttribute(attributeName);
+  public getTagName(): Promise<string> {
+    return this._driver.element(this).getTagName()
+  }
 
-    }
+  public getCSSValue(cssPropertyName: string): Promise<string> {
+    return this._driver.element(this).getCSSValue(cssPropertyName)
+  }
 
-    public getProperty(propertyName : string) : Promise<string> {
-        return this._driver.element(this).getProperty(propertyName);
-    }
+  public getValue(): Promise<string> {
+    return this._driver.element(this).getValue()
+  }
 
-    public getTagName() : Promise<string> {
-        return this._driver.element(this).getTagName();
-    }
+  public getText(): Promise<string> {
+    return this._driver.element(this).getText()
+  }
 
-    public getCSSValue(cssPropertyName : string) : Promise<string> {
-        return this._driver.element(this).getCSSValue(cssPropertyName);
-    }
+  public clear(): Promise<void> {
+    return this._driver.element(this).clear()
+  }
 
-    public getValue() : Promise<string> {
-        return this._driver.element(this).getValue();
+  public sendKeys(keys: string): Promise<void> {
+    return this._driver.element(this).sendKeys(keys)
+  }
 
-    }
+  public isSelected(): Promise<boolean> {
+    return this._driver.element(this).isSelected()
+  }
 
-    public getText() : Promise<string> {
-        return  this._driver.element(this).getText();
-    }
+  public isEnabled(): Promise<boolean> {
+    return this._driver.element(this).isEnabled()
+  }
 
-    public clear() : Promise<void> {
-        return  this._driver.element(this).clear();
-    }
+  /**
+   * Take of screenshot of the selected element
+   * @returns a base 64 string of the element screenshot
+   */
+  public screenshot(): Promise<string> {
+    return this._driver.element(this).screenshot()
+  }
 
-    public sendKeys(keys : string) : Promise<void> {
-        return  this._driver.element(this).sendKeys(keys);
-    }
+  /**
+   *
+   * @returns
+   */
+  public findElement(
+    using: Using,
+    value: string,
+    timeout: number = null
+  ): Promise<Element> {
+    return this._driver.element(this).findElement(using, value, timeout)
+  }
 
-    public isSelected() : Promise<boolean> {
-        return this._driver.element(this).isSelected();
-    }
+  /**
+   *
+   * @returns
+   */
+  public findElements(
+    using: Using,
+    value: string,
+    timeout: number = null
+  ): Promise<Element[]> {
+    return this._driver.element(this).findElements(using, value, timeout)
+  }
 
-    public isEnabled() : Promise<boolean> {
-        return this._driver.element(this).isEnabled();
-    }
-
-    /**
-     * Take of screenshot of the selected element
-     * @returns a base 64 string of the element screenshot
-     */
-    public screenshot() : Promise<string> {
-        return this._driver.element(this).screenshot();
-    }
-
-    /**
-     * 
-     * @returns 
-     */
-    public findElement(using : Using, value : string, timeout : number = null) : Promise<Element> {
-        return this._driver.element(this).findElement(using, value, timeout);
-    }
-
-    /**
-     * 
-     * @returns 
-     */
-     public findElements(using : Using, value : string, timeout : number = null) : Promise<Element[]> {
-        return this._driver.element(this).findElements(using, value, timeout);
-    }
-
-    public toString() {
-        return this["element-6066-11e4-a52e-4f735466cecf"];
-    }
+  public toString() {
+    return this['element-6066-11e4-a52e-4f735466cecf']
+  }
 }

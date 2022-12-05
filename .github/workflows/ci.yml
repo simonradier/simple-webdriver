@@ -2,9 +2,9 @@ name: Tests & Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
   workflow_dispatch:
 
@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      COVERALLS_REPO_TOKEN: "${{ secrets.COVERALLS_REPO_TOKEN }}"
-      COVERALLS_GIT_BRANCH: "${{ github.ref }}"
-      COVERALLS_SERVICE_NAME: "Github CI"
+      COVERALLS_REPO_TOKEN: '${{ secrets.COVERALLS_REPO_TOKEN }}'
+      COVERALLS_GIT_BRANCH: '${{ github.ref }}'
+      COVERALLS_SERVICE_NAME: 'Github CI'
 
     steps:
       - uses: actions/checkout@v2
-        
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
 
@@ -30,13 +30,12 @@ jobs:
         run: npm run prepublishOnly
 
       - name: Launch unit testing
-        run: npm run test 
+        run: npm run test
 
       - name: Launch coverage update
         if: github.ref == 'refs/heads/main'
         run: npm run coverage
-         
-  
+
   e2e-test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -54,7 +53,7 @@ jobs:
             browser: edge #Not available
     steps:
       - uses: actions/checkout@v2
-        
+
       - name: Setup Node.js environment
         uses: actions/setup-node@v2.1.4
 
@@ -66,15 +65,15 @@ jobs:
 
       - name: Run chromedriver (ubuntu)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'ubuntu-latest' }}
-        run: xvfb-run --auto-servernum chromedriver & 
+        run: xvfb-run --auto-servernum chromedriver &
 
       - name: Run chromedriver (windows)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'windows-latest' }}
-        run: cmd /c "START chromedriver" 
+        run: cmd /c "START chromedriver"
 
       - name: Run chromedriver (macos)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'macos-latest' }}
-        run: chromedriver & 
+        run: chromedriver &
 
       - name: Run geckodriver (ubuntu)
         if: ${{ matrix.browser == 'firefox' && matrix.os == 'ubuntu-latest' }}
@@ -90,17 +89,17 @@ jobs:
 
       - name: Run msedgedriver (windows)
         if: ${{ matrix.browser == 'edge' && matrix.os == 'windows-latest'  }}
-        run: cmd /c "START msedgedriver --port=9415" 
+        run: cmd /c "START msedgedriver --port=9415"
 
       - name: Run msedgedriver (macos)
         if: ${{ matrix.browser == 'edge' && matrix.os == 'macos-latest'  }}
-        run: msedgedriver --port=9415 & 
+        run: msedgedriver --port=9415 &
 
       - name: Run safaridriver (macos)
         if: ${{ matrix.browser == 'safari' }}
         run: |
           sudo safaridriver --enable
-          safaridriver --port 9315 & 
+          safaridriver --port 9315 &
 
       - name: Run test with webdriver ${{ matrix.os }}-${{ matrix.browser }}
         run: npm run test-wd-${{ matrix.browser }}

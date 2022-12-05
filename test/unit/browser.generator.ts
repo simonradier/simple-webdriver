@@ -578,7 +578,7 @@ export function generateBrowserTest(browserType : string) {
                 it('should not be possible to switch to a frame with an unknown ids', async function() {
                     const resp = td.WD_FRAME_SWITCH.KO_ELEM;
                     nock(td.WD_SERVER_URL_HTTP[browserType]).post(`/session/${td.WD_SESSION_ID}/frame`).reply(resp.code, resp.body, resp.headers);
-                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id3)).to.be.rejectedWith(/no such element/);
+                    await expect(g_browser.frame().switch(td.WD_FRAME_INFO.id3)).to.be.rejected;
                 });
 
                 it('should be possible to switch to the top-context with the null value', async function() {

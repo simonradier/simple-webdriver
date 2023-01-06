@@ -17,7 +17,7 @@ export enum WD_TESTED_Driver {
 
 export const WD_SERVER_URL_HTTP = {
   Chrome: 'http://localhost:9515',
-  Firefox: 'http://localhost:4444',
+  Firefox: 'http://127.0.0.1:4444',
   Chromium: 'http://localhost:9515',
   Edge: 'http://localhost:9415',
   Safari: 'http://localhost:9315'
@@ -25,7 +25,7 @@ export const WD_SERVER_URL_HTTP = {
 
 export const WD_SERVER_URL_HTTPS = {
   Chrome: 'https://localhost:9515',
-  Firefox: 'https://localhost:4444',
+  Firefox: 'https://127.0.0.1:4444',
   Chromium: 'https://localhost:9515',
   Edge: 'https://localhost:9415',
   Safari: 'https://localhost:9315'

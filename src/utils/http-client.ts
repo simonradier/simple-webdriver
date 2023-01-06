@@ -17,7 +17,8 @@ export async function call<T>(
     let req: http.ClientRequest
     const sBody = JSON.stringify(body)
     httpOptions.timeout = 1000 * 10
-    if (body) httpOptions.headers['Content-Length'] = sBody.length
+    if (body) 
+      httpOptions.headers['Content-Length'] = new Blob([sBody]).size
     if (url.startsWith('https://')) {
       req = https.request(url, httpOptions)
     } else {

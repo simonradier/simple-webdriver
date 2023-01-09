@@ -1,3 +1,4 @@
+import { Blob } from 'buffer'
 import * as http from 'http'
 import * as https from 'https'
 

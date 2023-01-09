@@ -10,7 +10,8 @@ on:
 
 jobs:
   unit-test:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest  
+    timeout-minutes: 5
     strategy:
       matrix:
         node: [ 16, 18, 19 ]
@@ -44,6 +45,7 @@ jobs:
 
   e2e-test:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]

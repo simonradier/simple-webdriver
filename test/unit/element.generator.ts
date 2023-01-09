@@ -16,9 +16,15 @@ export function generateElementTest(browserType: string) {
       // Clean previous sessions
       await WebDriver.cleanSessions()
       g_driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
+      // Required for session Start
+      const resp = td.WD_START_SESSION_RESPONSE.OK
+      nock(td.WD_SERVER_URL_HTTP[browserType])
+        .post('/session')
+        .reply(resp.code, resp.body, resp.headers)
+      g_browser = await g_driver.start(BrowserType[browserType])
     })
 
-    afterEach(async function () {
+    after(async function () {
       if (!nock.isActive()) {
         if (browserType === 'Safari' || browserType === 'Firefox')
           // wait 1.5 sec for Safari or Firefox to avoid "Could not create a session error"
@@ -30,11 +36,13 @@ export function generateElementTest(browserType: string) {
     beforeEach(async function () {
       nock.cleanAll()
       // Required for session Start
-      let resp = td.WD_START_SESSION_RESPONSE.OK
+      const resp = td.WD_NAVIGATE_TO_RESPONSE.OK
       nock(td.WD_SERVER_URL_HTTP[browserType])
-        .post('/session')
+        .post(`/session/${td.WD_SESSION_ID}/url`)
         .reply(resp.code, resp.body, resp.headers)
-      g_browser = await g_driver.start(BrowserType[browserType])
+      // @ts-ignore clean the _close set to true
+      g_browser._closed = false
+      await g_browser.navigate().to('about:blank')
       // Required for Navigation To
       let resp2 = td.WD_NAVIGATE_TO_RESPONSE.OK
       nock(td.WD_SERVER_URL_HTTP[browserType])

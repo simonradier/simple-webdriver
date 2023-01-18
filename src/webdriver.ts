@@ -74,7 +74,7 @@ export class WebDriver {
     switch (using) {
       case Using.id:
         script = multiple
-          ? `return [ document.getElementById(arguments[0]) ];`
+          ? `return [ document.getElementById(arguments[0]) ].filter(e => e != null);`
           : `return document.getElementById(arguments[0]);`
         if (element)
           Logger.warn(

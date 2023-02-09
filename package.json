@@ -42,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^5.48.0",
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
-    "chromedriver": "^108.0.0",
+    "chromedriver": "^110.0.0",
     "coveralls": "^3.1.1",
     "eslint": "^8.31.0",
     "mocha": "^10.2.0",

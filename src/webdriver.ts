@@ -325,6 +325,23 @@ export class WebDriver {
           }
         }
       },
+      alert: () => {
+        return {
+          accept: () => {
+            return wdapi.call<void>(this._serverURL, this._api.ALERT_ACCEPT(session))
+          },
+          dismiss: () => {
+            return wdapi.call<void>(this._serverURL, this._api.ALERT_DISMISS(session))
+          },
+          sendText: (text : string) => {
+            return wdapi.call<void>(this._serverURL, this._api.ALERT_SENDTEXT(session, text))
+          },
+          getText: async () => {
+            const resp = await wdapi.call<string>(this._serverURL, this._api.ALERT_GETTEXT(session))
+            return resp.body.value
+          },
+        }
+      },
       cookie: () => {
         return {
           get: async (name: string) => {

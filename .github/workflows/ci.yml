@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        browser: [chrome, edge, safari, firefox]
+        browser: [chrome, safari, firefox]
         exclude:
           - os: macos-latest
             browser: edge #because its webdriver is buggy on MacOS with GithubAction

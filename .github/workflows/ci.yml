@@ -98,13 +98,13 @@ jobs:
         if: ${{ matrix.browser == 'firefox' && matrix.os == 'macos-latest' }}
         run: geckodriver &
 
-      - name: Run msedgedriver (windows)
-        if: ${{ matrix.browser == 'edge' && matrix.os == 'windows-latest'  }}
-        run: cmd /c "START msedgedriver --port=9415"
+      # - name: Run msedgedriver (windows)
+      #   if: ${{ matrix.browser == 'edge' && matrix.os == 'windows-latest'  }}
+      #   run: cmd /c "START msedgedriver --port=9415"
 
-      - name: Run msedgedriver (macos)
-        if: ${{ matrix.browser == 'edge' && matrix.os == 'macos-latest'  }}
-        run: msedgedriver --port=9415 &
+      # - name: Run msedgedriver (macos)
+      #   if: ${{ matrix.browser == 'edge' && matrix.os == 'macos-latest'  }}
+      #   run: msedgedriver --port=9415 &
 
       - name: Run safaridriver (macos)
         if: ${{ matrix.browser == 'safari' }}

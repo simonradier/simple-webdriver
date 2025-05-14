@@ -544,11 +544,11 @@ export class WebDriver {
 
   public async start(
     browserType: BrowserType,
-    capabilities: Capabilities = Capabilities.default
+    capabilities: Capabilities = new Capabilities(browserType)
   ): Promise<Browser> {
     const resp = await wdapi.call<SessionDef>(
       this.serverURL,
-      this._api.SESSION_START(browserType, capabilities.args)
+      this._api.SESSION_START(browserType, capabilities)
     )
     let error: WebDriverResponseError
 

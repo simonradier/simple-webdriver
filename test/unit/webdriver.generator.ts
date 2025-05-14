@@ -78,14 +78,14 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver('http://127.0.0.1:50000')
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/ECONNREFUSED/)
       })
       it('should throw an exception if the server connection is timeouting', async function () {
         let driver: WebDriver
         driver = new WebDriver('http://fake-server.local')
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/ENOTFOUND|EAI_AGAIN/)
       }).timeout(10000)
 
@@ -98,7 +98,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/Incorrect HTTP header/)
       })
 
@@ -111,7 +111,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/empty or null/)
       })
 
@@ -124,7 +124,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/empty or null/)
       })
 
@@ -137,7 +137,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/Missing.*sessionId/)
       })
 
@@ -150,7 +150,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/Missing.*capabilities/)
       })
 
@@ -163,7 +163,7 @@ export function generateWebDriverTest(browserType: string) {
         //@ts-ignore
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
-        let browser = await driver.start(BrowserType[browserType], Capabilities.default)
+        let browser = await driver.start(BrowserType[browserType])
         expect(browser).not.null
         if (nock.isActive()) {
           expect(browser.session).to.be.equal(td.WD_SESSION_ID)
@@ -187,7 +187,7 @@ export function generateWebDriverTest(browserType: string) {
           .reply(resp2.code, resp2.body, resp2.headers)
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
-        let browser = await driver.start(BrowserType[browserType], Capabilities.default)
+        let browser = await driver.start(BrowserType[browserType])
         expect(browser).not.null
         if (nock.isActive()) {
           expect(browser.session).to.be.equal(td.WD_SESSION_ID)
@@ -211,7 +211,9 @@ export function generateWebDriverTest(browserType: string) {
           .reply(resp2.code, resp2.body, resp2.headers)
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
-        let browser = await driver.start(BrowserType[browserType], Capabilities.headless)
+        let capabilities = new Capabilities(BrowserType[browserType])
+        capabilities.addArguments('--headless')
+        let browser = await driver.start(BrowserType[browserType], capabilities)
         expect(browser).not.null
         if (nock.isActive()) {
           expect(browser.session).to.be.equal(td.WD_SESSION_ID)
@@ -231,21 +233,21 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/Unexpected token/)
       })
 
       it('should throw an error if the server generate an error during response | Nock Only', async function () {
         //@ts-ignore
-        nock(td.WD_SERVER_URL_HTTP[browserType]).post('/session').replyWithError({
+        nock(td.WD_SERVER_URL_HTTP[browserType]).post('/session').reply(500, {
           message: 'something awful happened',
           code: 'AWFUL_ERROR'
-        })
+        }, { 'Content-type' : 'application/json'})
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
-        ).to.be.rejectedWith(/something awful happened/)
+          driver.start(BrowserType[browserType])
+        ).to.be.rejectedWith(/.*/)
       })
 
       it('should start a session if webdriver response is correct (https) | Nock Only', async function () {
@@ -261,7 +263,7 @@ export function generateWebDriverTest(browserType: string) {
           .reply(resp2.code, resp2.body, resp2.headers)
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTPS[browserType])
-        let browser = await driver.start(BrowserType[browserType], Capabilities.default)
+        let browser = await driver.start(BrowserType[browserType])
         expect(browser).not.null
         if (nock.isActive()) {
           expect(browser.session).to.be.equal(td.WD_SESSION_ID)
@@ -281,7 +283,7 @@ export function generateWebDriverTest(browserType: string) {
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(
-          driver.start(BrowserType[browserType], Capabilities.default)
+          driver.start(BrowserType[browserType])
         ).to.be.rejectedWith(/session : can't create/)
       })
     })

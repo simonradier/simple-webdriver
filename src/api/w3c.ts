@@ -1,3 +1,4 @@
+import { Capabilities } from '..'
 import { WDAPIDef, RequestDef } from '../interface'
 import { CookieDef } from '../interface/cookie'
 import { Logger } from '../utils/logger'
@@ -12,44 +13,13 @@ export class W3C implements WDAPIDef {
     }
   }
 
-  SESSION_START(browser: string, args: string[]): RequestDef {
+  SESSION_START(browser: string, capabilities : Capabilities): RequestDef {
     const result = new WebDriverRequest()
     W3C._initHttpOptions(result)
     result.data = {
-      capabilities: {
-        alwaysMatch: {
-          browserName: browser
-        }
-      }
+      capabilities
     }
-    let browserOptions = 'browserOptions'
-    switch (browser) {
-      case 'chrome':
-      case 'chromium':
-        browserOptions = 'goog:chromeOptions'
-        break
-      case 'firefox':
-        browserOptions = 'moz:firefoxOptions'
-        break
-      case 'msedge':
-        browserOptions = 'ms:edgeOptions'
-        break
-      case 'safari':
-        browserOptions = 'safari:options'
-    }
-    if (args.some(arg => arg.includes('headless'))) {
-      switch (browser) {
-        case 'msedge':
-        case 'chrome':
-        case 'chromium':
-        case 'firefox':
-          break
-        default:
-          Logger.warn('headless feature is not supported by : ' + browser)
-      }
-    }
-    result.data.capabilities.alwaysMatch[browserOptions] = { args }
-    //result.data.capabilities.alwaysMatch[browserOptions].w3c = true;
+
     result.path = 'session'
     result.requestOptions.method = 'POST'
     return result

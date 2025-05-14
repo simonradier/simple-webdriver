@@ -16,14 +16,13 @@ export class Capabilities {
         break
       case 'safari':
         this.browserOptions = 'safari:options'
-    }
- 
+    } 
+    this.alwaysMatch = { browserName : browserType }
     this.alwaysMatch[this.browserOptions] = { args : [] }
   }
 
   private browserOptions = "browserOptions"
-  public alwaysMatch : Array<object> = []
-  public args: string[] = new Array<string>()
+  public alwaysMatch : any
 
   public addArguments(arg: string) {
     this.alwaysMatch[this.browserOptions].args.push(arg)

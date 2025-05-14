@@ -27,4 +27,8 @@ export class Capabilities {
   public addArguments(arg: string) {
     this.alwaysMatch[this.browserOptions].args.push(arg)
   }
+
+  public setOption(key : string, value : unknown) {
+    this.alwaysMatch[this.browserOptions][key] = value
+  }
 }

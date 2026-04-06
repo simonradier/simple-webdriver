@@ -42,6 +42,32 @@ export class Window {
     return this._webdriver.window(this).getSize()
   }
 
+  public async setRect(
+    x: number | null,
+    y: number | null,
+    width: number | null,
+    height: number | null
+  ) {
+    if (this._closed) throw new WebDriverError("Can't setRect of a closed window")
+
+    await this.switch()
+    return this._webdriver.window(this).setRect(x, y, width, height)
+  }
+
+  public async getPosition() {
+    if (this._closed) throw new WebDriverError("Can't getPosition of a closed window")
+
+    await this.switch()
+    return this._webdriver.window(this).getPosition()
+  }
+
+  public async setPosition(x: number, y: number) {
+    if (this._closed) throw new WebDriverError("Can't setPosition of a closed window")
+
+    await this.switch()
+    return this._webdriver.window(this).setPosition(x, y)
+  }
+
   public async maximize() {
     if (this._closed) throw new WebDriverError("Can't maximize of a closed window")
 

@@ -1,10 +1,16 @@
 import { Capabilities } from '../capabilities'
-import { CookieDef } from '../interface'
+import { CookieDef, PrintOptionsDef } from '../interface'
 import { RequestDef } from './request'
 
 export interface WDAPIDef {
+  STATUS(): RequestDef
   SESSION_START(browser: string, capabilities: Capabilities): RequestDef
   SESSION_STOP(sessionId: string): RequestDef
+  GET_TIMEOUTS(sessionId: string): RequestDef
+  SET_TIMEOUTS(
+    sessionId: string,
+    timeouts: { script?: number; pageLoad?: number; implicit?: number }
+  ): RequestDef
   NAVIGATE_CURRENTURL(sessionId: string): RequestDef
   NAVIGATE_TO(sessionId: string, url: string): RequestDef
   NAVIGATE_REFRESH(sessionId: string): RequestDef
@@ -12,9 +18,17 @@ export interface WDAPIDef {
   NAVIGATE_FORWARD(sessionId: string): RequestDef
   WINDOW_CREATE(sessionId: string, type: 'tab' | 'window'): RequestDef
   GETTITLE(sessionId: string): RequestDef
+  GET_PAGE_SOURCE(sessionId: string): RequestDef
+  PRINT(sessionId: string, options?: PrintOptionsDef): RequestDef
   WINDOW_GETHANDLE(sessionId: string): RequestDef
   WINDOW_GETHANDLES(sessionId: string): RequestDef
-  WINDOW_SETRECT(sessionId: string, width: number, height: number): RequestDef
+  WINDOW_SETRECT(
+    sessionId: string,
+    x: number | null,
+    y: number | null,
+    width: number | null,
+    height: number | null
+  ): RequestDef
   WINDOW_GETRECT(sessionId: string): RequestDef
   WINDOW_MAXIMIZE(sessionId: string): RequestDef
   WINDOW_MINIMIZE(sessionId: string): RequestDef

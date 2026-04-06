@@ -9,7 +9,9 @@ import {
   ResponseDef,
   CookieDef,
   RequestDef,
-  ErrorDef
+  ErrorDef,
+  PrintOptionsDef,
+  StatusDef
 } from './interface'
 import * as wdapi from './api'
 import { LocationError, WebDriverResponseError, WebDriverError } from './error'
@@ -312,6 +314,37 @@ export class WebDriver {
         )
         return resp.body.value
       },
+      getTimeouts: async () => {
+        const resp = await wdapi.call<TimeoutsDef>(
+          this.serverURL,
+          this._api.GET_TIMEOUTS(session)
+        )
+        return resp.body.value
+      },
+      setTimeouts: async (timeouts: {
+        script?: number
+        pageLoad?: number
+        implicit?: number
+      }) => {
+        await wdapi.call<void>(
+          this.serverURL,
+          this._api.SET_TIMEOUTS(session, timeouts)
+        )
+      },
+      getPageSource: async () => {
+        const resp = await wdapi.call<string>(
+          this.serverURL,
+          this._api.GET_PAGE_SOURCE(session)
+        )
+        return resp.body.value
+      },
+      print: async (options?: PrintOptionsDef) => {
+        const resp = await wdapi.call<string>(
+          this.serverURL,
+          this._api.PRINT(session, options)
+        )
+        return resp.body.value
+      },
       frame: () => {
         return {
           switch: async (frameId: string | number | null) => {
@@ -395,7 +428,33 @@ export class WebDriver {
       setSize: async (width: number, height: number) => {
         const resp = await wdapi.call<WindowRect>(
           this.serverURL,
-          this._api.WINDOW_SETRECT(window.session, width, height)
+          this._api.WINDOW_SETRECT(window.session, null, null, width, height)
+        )
+        return resp.body.value
+      },
+      setRect: async (
+        x: number | null,
+        y: number | null,
+        width: number | null,
+        height: number | null
+      ) => {
+        const resp = await wdapi.call<WindowRect>(
+          this.serverURL,
+          this._api.WINDOW_SETRECT(window.session, x, y, width, height)
+        )
+        return resp.body.value
+      },
+      getPosition: async () => {
+        const resp = await wdapi.call<WindowRect>(
+          this.serverURL,
+          this._api.WINDOW_GETRECT(window.session)
+        )
+        return { x: resp.body.value.x, y: resp.body.value.y }
+      },
+      setPosition: async (x: number, y: number) => {
+        const resp = await wdapi.call<WindowRect>(
+          this.serverURL,
+          this._api.WINDOW_SETRECT(window.session, x, y, null, null)
         )
         return resp.body.value
       },
@@ -582,6 +641,13 @@ export class WebDriver {
     const browser = new Browser(session, browserType, timeouts, this)
     WebDriver._onGoingSessions[session] = { url: this.serverURL, api: this._api }
     return browser
+  }
+
+  public static async status(serverURL: string): Promise<StatusDef> {
+    const url = new URL(serverURL)
+    const api = new wdapi.W3C()
+    const resp = await wdapi.call<StatusDef>(url, api.STATUS())
+    return resp.body.value
   }
 
   public static async cleanSessions(): Promise<void> {

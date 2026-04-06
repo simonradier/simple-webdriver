@@ -1,6 +1,6 @@
 import { Element } from '.'
 import { WebDriverError } from './error'
-import { TimeoutsDef } from './interface/timeouts'
+import { TimeoutsDef, PrintOptionsDef } from './interface'
 import { Using, WebDriver } from './swd'
 import { WindowType } from './window'
 
@@ -167,5 +167,21 @@ export class Browser {
    */
   public cookie() {
     return this._webdriver.browser(this).cookie()
+  }
+
+  public getTimeouts() {
+    return this._webdriver.browser(this).getTimeouts()
+  }
+
+  public setTimeouts(timeouts: { script?: number; pageLoad?: number; implicit?: number }) {
+    return this._webdriver.browser(this).setTimeouts(timeouts)
+  }
+
+  public getPageSource() {
+    return this._webdriver.browser(this).getPageSource()
+  }
+
+  public print(options?: PrintOptionsDef) {
+    return this._webdriver.browser(this).print(options)
   }
 }

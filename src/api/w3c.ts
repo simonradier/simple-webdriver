@@ -1,5 +1,5 @@
 import { Capabilities } from '..'
-import { WDAPIDef, RequestDef } from '../interface'
+import { WDAPIDef, RequestDef, PrintOptionsDef } from '../interface'
 import { CookieDef } from '../interface/cookie'
 import { Logger } from '../utils/logger'
 import { WebDriverRequest } from './webdriver-request'
@@ -13,7 +13,15 @@ export class W3C implements WDAPIDef {
     }
   }
 
-  SESSION_START(browser: string, capabilities : Capabilities): RequestDef {
+  STATUS(): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = 'status'
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  SESSION_START(browser: string, capabilities: Capabilities): RequestDef {
     const result = new WebDriverRequest()
     W3C._initHttpOptions(result)
     result.data = {
@@ -30,6 +38,26 @@ export class W3C implements WDAPIDef {
     W3C._initHttpOptions(result)
     result.path = `session/${sessionId}`
     result.requestOptions.method = 'DELETE'
+    return result
+  }
+
+  GET_TIMEOUTS(sessionId: string): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/timeouts`
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  SET_TIMEOUTS(
+    sessionId: string,
+    timeouts: { script?: number; pageLoad?: number; implicit?: number }
+  ): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/timeouts`
+    result.requestOptions.method = 'POST'
+    result.data = timeouts
     return result
   }
 
@@ -86,6 +114,23 @@ export class W3C implements WDAPIDef {
     return result
   }
 
+  GET_PAGE_SOURCE(sessionId: string): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/source`
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  PRINT(sessionId: string, options?: PrintOptionsDef): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/print`
+    result.requestOptions.method = 'POST'
+    result.data = options || {}
+    return result
+  }
+
   WINDOW_GETHANDLE(sessionId: string): RequestDef {
     const result = new WebDriverRequest()
     W3C._initHttpOptions(result)
@@ -113,15 +158,22 @@ export class W3C implements WDAPIDef {
     return result
   }
 
-  WINDOW_SETRECT(sessionId: string, width: number, height: number): RequestDef {
+  WINDOW_SETRECT(
+    sessionId: string,
+    x: number | null,
+    y: number | null,
+    width: number | null,
+    height: number | null
+  ): RequestDef {
     const result = new WebDriverRequest()
     W3C._initHttpOptions(result)
     result.path = `session/${sessionId}/window/rect`
     result.requestOptions.method = 'POST'
-    result.data = {
-      width,
-      height
-    }
+    result.data = {}
+    if (x !== null) result.data.x = x
+    if (y !== null) result.data.y = y
+    if (width !== null) result.data.width = width
+    if (height !== null) result.data.height = height
     return result
   }
 
@@ -191,7 +243,6 @@ export class W3C implements WDAPIDef {
     result.path = `session/${sessionId}/frame`
     result.requestOptions.method = 'POST'
     if (typeof frameId === 'string')
-      // element can be string alone but me be wrapped
       result.data = {
         id: {
           'element-6066-11e4-a52e-4f735466cecf': frameId

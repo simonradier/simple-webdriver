@@ -12,7 +12,7 @@ import {
   LocationError,
   WebDriverError,
   WebDriverResponseError
-} from './swd'
+} from './swd.js'
 
 export {
   WebDriver,

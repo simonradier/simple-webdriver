@@ -1,6 +1,6 @@
-import { Capabilities } from '../capabilities'
-import { CookieDef, PrintOptionsDef } from '../interface'
-import { RequestDef } from './request'
+import { Capabilities } from '../capabilities.js'
+import { CookieDef, PrintOptionsDef } from '../interface.js'
+import { RequestDef } from './request.js'
 
 export interface WDAPIDef {
   STATUS(): RequestDef

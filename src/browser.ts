@@ -1,8 +1,8 @@
-import { Element } from '.'
-import { WebDriverError } from './error'
-import { TimeoutsDef, PrintOptionsDef } from './interface'
-import { Using, WebDriver } from './swd'
-import { WindowType } from './window'
+import { Element } from './index.js'
+import { WebDriverError } from './error.js'
+import { TimeoutsDef, PrintOptionsDef } from './interface.js'
+import { Using, WebDriver } from './swd.js'
+import { WindowType } from './window.js'
 
 export enum BrowserType {
   Chrome = 'chrome',

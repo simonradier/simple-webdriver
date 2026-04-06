@@ -1,5 +1,5 @@
-import { WebDriver, Browser } from './swd'
-import { Using } from './webdriver'
+import { WebDriver, Browser } from './swd.js'
+import { Using } from './webdriver.js'
 
 export class Element {
   public readonly browser: Browser

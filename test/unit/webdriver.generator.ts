@@ -8,10 +8,10 @@ import {
   Element,
   Capabilities,
   BrowserType
-} from '../../src/swd'
-import { loggerConfiguration, LogLevel } from '../../src/utils/logger'
+} from '../../src/swd.js'
+import { loggerConfiguration, LogLevel } from '../../src/utils/logger.js'
 import nock from 'nock'
-import * as td from './data'
+import * as td from './data.js'
 
 chai.use(chaiAsPromised)
 
@@ -239,10 +239,7 @@ export function generateWebDriverTest(browserType: string) {
 
       it('should throw an error if the server generate an error during response | Nock Only', async function () {
         //@ts-ignore
-        nock(td.WD_SERVER_URL_HTTP[browserType]).post('/session').reply(500, {
-          message: 'something awful happened',
-          code: 'AWFUL_ERROR'
-        }, { 'Content-type' : 'application/json'})
+        nock(td.WD_SERVER_URL_HTTP[browserType]).post('/session').replyWithError(new Error('something awful happened'))
         let driver: WebDriver
         driver = new WebDriver(td.WD_SERVER_URL_HTTP[browserType])
         await expect(

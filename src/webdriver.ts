@@ -1,5 +1,5 @@
-import { Element, Window, Capabilities, Browser } from './swd'
-import { HttpResponse } from './utils/http-client'
+import { Element, Window, Capabilities, Browser } from './swd.js'
+import { HttpResponse } from './utils/http-client.js'
 import {
   WindowRect,
   ElementDef,
@@ -12,12 +12,12 @@ import {
   ErrorDef,
   PrintOptionsDef,
   StatusDef
-} from './interface'
-import * as wdapi from './api'
-import { LocationError, WebDriverResponseError, WebDriverError } from './error'
-import { Logger } from './utils/logger'
-import { BrowserType } from './browser'
-import { WindowType } from './window'
+} from './interface.js'
+import * as wdapi from './api.js'
+import { LocationError, WebDriverResponseError, WebDriverError } from './error.js'
+import { Logger } from './utils/logger.js'
+import { BrowserType } from './browser.js'
+import { WindowType } from './window.js'
 
 export enum Using {
   id = 'id',

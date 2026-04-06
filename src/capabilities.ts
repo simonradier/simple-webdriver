@@ -1,4 +1,4 @@
-import { BrowserType } from "./swd"
+import { BrowserType } from "./swd.js"
 
 export class Capabilities {
 

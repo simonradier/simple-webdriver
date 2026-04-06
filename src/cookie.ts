@@ -1,5 +1,5 @@
-import { CookieDef } from './interface'
-import { Browser } from './swd'
+import { CookieDef } from './interface.js'
+import { Browser } from './swd.js'
 
 export class Cookie implements CookieDef {
   public readonly name: string

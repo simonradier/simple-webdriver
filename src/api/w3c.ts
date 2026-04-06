@@ -1,8 +1,8 @@
-import { Capabilities } from '..'
-import { WDAPIDef, RequestDef, PrintOptionsDef } from '../interface'
-import { CookieDef } from '../interface/cookie'
-import { Logger } from '../utils/logger'
-import { WebDriverRequest } from './webdriver-request'
+import { Capabilities } from '../index.js'
+import { WDAPIDef, RequestDef, PrintOptionsDef } from '../interface.js'
+import { CookieDef } from '../interface/cookie.js'
+import { Logger } from '../utils/logger.js'
+import { WebDriverRequest } from './webdriver-request.js'
 
 export class W3C implements WDAPIDef {
   private static _initHttpOptions(request: RequestDef) {

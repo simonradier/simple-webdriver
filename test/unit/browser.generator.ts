@@ -1,11 +1,11 @@
 import { expect } from 'chai'
 import nock from 'nock'
-import { Cookie } from '../../src'
-import { Browser, BrowserType } from '../../src/browser'
-import { loggerConfiguration, LogLevel } from '../../src/utils/logger'
-import { Using, WebDriver } from '../../src/webdriver'
-import { WindowType } from '../../src/window'
-import * as td from './data'
+import { Cookie } from '../../src/index.js'
+import { Browser, BrowserType } from '../../src/browser.js'
+import { loggerConfiguration, LogLevel } from '../../src/utils/logger.js'
+import { Using, WebDriver } from '../../src/webdriver.js'
+import { WindowType } from '../../src/window.js'
+import * as td from './data.js'
 
 export function generateBrowserTest(browserType: string) {
   describe('Browser', function () {

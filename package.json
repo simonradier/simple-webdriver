@@ -1,6 +1,6 @@
 {
   "name": "@critik/simple-webdriver",
-  "version": "0.3.0",
+  "version": "0.4.0-dev1",
   "description": "Javascript webdriver bindings with no dependency",
   "keywords": [
     "webdriver",
@@ -11,11 +11,11 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublishOnly": "tsc",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 -r ts-node/register/transpile-only 'test/unit/*test.ts'",
-    "test-wd-chrome": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-safari": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-edge": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
-    "test-wd-firefox": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 -r ts-node/register 'test/unit/*test.ts'",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' nyc --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 -r ts-node/esm 'test/unit/*test.ts'",
+    "test-wd-chrome": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 -r ts-node/esm 'test/unit/*test.ts'",
+    "test-wd-safari": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 -r ts-node/esm 'test/unit/*test.ts'",
+    "test-wd-edge": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 -r ts-node/esm 'test/unit/*test.ts'",
+    "test-wd-firefox": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' NOCK_OFF=true mocha --retries 2 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 -r ts-node/esm 'test/unit/*test.ts'",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write ."
@@ -34,22 +34,22 @@
   },
   "homepage": "https://github.com/simonradier/simple-webdriver#readme",
   "devDependencies": {
-    "@types/chai": "^4.3.4",
-    "@types/chai-as-promised": "^7.1.5",
-    "@types/mocha": "^10.0.1",
-    "@types/node": "^18.11.18",
-    "@typescript-eslint/parser": "^5.48.0",
-    "@typescript-eslint/eslint-plugin": "^5.48.0",
-    "chai": "^4.3.7",
-    "chai-as-promised": "^7.1.1",
-    "chromedriver": "^108.0.0",
+    "@types/chai": "^5.2.2",
+    "@types/chai-as-promised": "^8.0.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.15.18",
+    "@typescript-eslint/parser": "^8.32.1",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "chai": "^5.2.0",
+    "chai-as-promised": "^8.0.1",
+    "chromedriver": "^136.0.0",
     "coveralls": "^3.1.1",
-    "eslint": "^8.31.0",
-    "mocha": "^10.2.0",
-    "nock": "^13.2.9",
-    "nyc": "^15.1.0",
-    "prettier": "^2.8.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "eslint": "^9.26.0",
+    "mocha": "^11.2.2",
+    "nock": "^14.0.4",
+    "nyc": "^17.1.0",
+    "prettier": "^3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

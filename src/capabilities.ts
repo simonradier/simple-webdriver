@@ -1,16 +1,34 @@
+import { BrowserType } from "./swd"
+
 export class Capabilities {
-  public args: string[] = new Array<string>()
+
+  public constructor(browserType : BrowserType) {
+    switch (browserType) {
+      case 'chrome':
+      case 'chromium':
+        this.browserOptions = 'goog:chromeOptions'
+        break
+      case 'firefox':
+        this.browserOptions = 'moz:firefoxOptions'
+        break
+      case 'msedge':
+        this.browserOptions = 'ms:edgeOptions'
+        break
+      case 'safari':
+        this.browserOptions = 'safari:options'
+    } 
+    this.alwaysMatch = { browserName : browserType }
+    this.alwaysMatch[this.browserOptions] = { args : [] }
+  }
+
+  private browserOptions = "browserOptions"
+  public alwaysMatch : any
 
   public addArguments(arg: string) {
-    this.args.push(arg)
+    this.alwaysMatch[this.browserOptions].args.push(arg)
   }
 
-  public get headless(): boolean {
-    return this.args.some(arg => arg.includes('headless'))
+  public setOption(key : string, value : unknown) {
+    this.alwaysMatch[this.browserOptions][key] = value
   }
-
-  public static headless = new Capabilities()
-  public static default = new Capabilities()
 }
-
-Capabilities.headless.args = ['--headless']

@@ -1,8 +1,10 @@
-import { Element } from '.'
-import { WebDriverError } from './error'
-import { TimeoutsDef } from './interface/timeouts'
-import { Using, WebDriver } from './swd'
-import { WindowType } from './window'
+import { Element } from './index.js'
+import { WebDriverError } from './error.js'
+import { ActionSequence } from './interface/actions.js'
+import { PrintOptions } from './interface/print.js'
+import { TimeoutsDef } from './interface/timeouts.js'
+import { Using, WebDriver } from './swd.js'
+import { Window, WindowType } from './window.js'
 
 export enum BrowserType {
   Chrome = 'chrome',
@@ -78,10 +80,10 @@ export class Browser {
 
   /**
    * Open a new Window or Tab which will launch "about:blank" url
-   * @param type Allow to chose if the new Window is a "Tab" type of "Window" type
-   * @returns
+   * @param type Allow to chose if the new Window is a "Tab" type or "Window" type
+   * @returns the newly created Window object
    */
-  public async newWindow(type: WindowType) {
+  public async newWindow(type: WindowType): Promise<Window> {
     return this._webdriver.browser(this).newWindow(type)
   }
 
@@ -167,5 +169,48 @@ export class Browser {
    */
   public cookie() {
     return this._webdriver.browser(this).cookie()
+  }
+
+  /**
+   * Get current session timeouts
+   */
+  public async getTimeouts() {
+    return this._webdriver.browser(this).getTimeouts()
+  }
+
+  /**
+   * Set session timeouts
+   */
+  public async setTimeouts(timeouts: { implicit?: number; pageLoad?: number; script?: number }) {
+    return this._webdriver.browser(this).setTimeouts(timeouts)
+  }
+
+  /**
+   * Get the page source of the current document
+   */
+  public async getPageSource() {
+    return this._webdriver.browser(this).getPageSource()
+  }
+
+  /**
+   * Print the current page to PDF
+   * @returns a base64-encoded PDF string
+   */
+  public async printPage(options?: PrintOptions) {
+    return this._webdriver.browser(this).printPage(options)
+  }
+
+  /**
+   * Perform a sequence of input actions
+   */
+  public async performActions(actions: ActionSequence[]) {
+    return this._webdriver.browser(this).performActions(actions)
+  }
+
+  /**
+   * Release all keys and pointer buttons currently held
+   */
+  public async releaseActions() {
+    return this._webdriver.browser(this).releaseActions()
   }
 }

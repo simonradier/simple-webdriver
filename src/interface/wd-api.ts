@@ -1,6 +1,8 @@
-import { Capabilities } from '../capabilities'
-import { CookieDef } from '../interface'
-import { RequestDef } from './request'
+import { Capabilities } from '../capabilities.js'
+import { CookieDef } from '../interface.js'
+import { ActionSequence } from './actions.js'
+import { PrintOptions } from './print.js'
+import { RequestDef } from './request.js'
 
 export interface WDAPIDef {
   SESSION_START(browser: string, capabilities: Capabilities): RequestDef
@@ -62,4 +64,11 @@ export interface WDAPIDef {
   ALERT_DISMISS(sessionId: string): RequestDef
   ALERT_GETTEXT(sessionId: string): RequestDef
   ALERT_SENDTEXT(sessionId: string, text: string): RequestDef
+  STATUS(): RequestDef
+  TIMEOUTS_GET(sessionId: string): RequestDef
+  TIMEOUTS_SET(sessionId: string, timeouts: { implicit?: number; pageLoad?: number; script?: number }): RequestDef
+  PAGESOURCE_GET(sessionId: string): RequestDef
+  PAGE_PRINT(sessionId: string, options?: PrintOptions): RequestDef
+  ACTIONS_PERFORM(sessionId: string, actions: ActionSequence[]): RequestDef
+  ACTIONS_RELEASE(sessionId: string): RequestDef
 }

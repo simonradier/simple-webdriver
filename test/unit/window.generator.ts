@@ -1,8 +1,8 @@
 import { expect } from 'chai'
 import nock from 'nock'
-import { loggerConfiguration, LogLevel } from '../../src/utils/logger'
-import { Window, Browser, BrowserType, WebDriver } from '../../src/swd'
-import * as td from './data'
+import { loggerConfiguration, LogLevel } from '../../src/utils/logger.js'
+import { Window, Browser, BrowserType, WebDriver } from '../../src/swd.js'
+import * as td from './data.js'
 
 export function generateWindowTest(browserType: string) {
   describe('Windows', function () {

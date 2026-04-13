@@ -1,5 +1,5 @@
-import { Element, Window, Capabilities, Browser } from './swd'
-import { HttpResponse } from './utils/http-client'
+import { Element, Window, Capabilities, Browser } from './swd.js'
+import { HttpResponse } from './utils/http-client.js'
 import {
   WindowRect,
   ElementDef,
@@ -9,13 +9,15 @@ import {
   ResponseDef,
   CookieDef,
   RequestDef,
-  ErrorDef
-} from './interface'
-import * as wdapi from './api'
-import { LocationError, WebDriverResponseError, WebDriverError } from './error'
-import { Logger } from './utils/logger'
-import { BrowserType } from './browser'
-import { WindowType } from './window'
+  ErrorDef,
+  ActionSequence,
+  PrintOptions
+} from './interface.js'
+import * as wdapi from './api.js'
+import { LocationError, WebDriverResponseError, WebDriverError } from './error.js'
+import { Logger } from './utils/logger.js'
+import { BrowserType } from './browser.js'
+import { WindowType } from './window.js'
 
 export enum Using {
   id = 'id',
@@ -127,6 +129,18 @@ export class WebDriver {
     this._api = new wdapi[protocol]()
   }
 
+  /**
+   * Query the server status
+   * @returns the server status object (ready state and metadata)
+   */
+  public async status() {
+    const resp = await wdapi.call<{ ready: boolean; message: string }>(
+      this.serverURL,
+      this._api.STATUS()
+    )
+    return resp.body.value
+  }
+
   /** @internal  */
   public browser(browser: Browser) {
     if (browser.closed) throw new WebDriverError('Browser session is closed.')
@@ -161,25 +175,21 @@ export class WebDriver {
           this._api.WINDOW_GETHANDLES(session)
         )
         const result: Array<Window> = new Array<Window>()
-        for (const handle in resp.body.value) {
+        for (const handle of resp.body.value) {
           result.push(new Window(handle, browser, this))
         }
         return result
       },
       /**
-       * Retreive a list Window objects which represent all the opened windows
-       * @returns a list of Window objects related to the browser session
+       * Open a new window or tab
+       * @returns the newly created Window object
        */
       newWindow: async (type: WindowType) => {
-        const resp = await wdapi.call<string[]>(
+        const resp = await wdapi.call<{ handle: string; type: string }>(
           this.serverURL,
           this._api.WINDOW_CREATE(session, type)
         )
-        const result: Array<Window> = new Array<Window>()
-        for (const handle in resp.body.value) {
-          result.push(new Window(handle, browser, this))
-        }
-        return result
+        return new Window(resp.body.value.handle, browser, this)
       },
       /**
        * Stop the browser session and close all related windows
@@ -341,6 +351,45 @@ export class WebDriver {
             return resp.body.value
           },
         }
+      },
+      getTimeouts: async () => {
+        const resp = await wdapi.call<TimeoutsDef>(
+          this.serverURL,
+          this._api.TIMEOUTS_GET(session)
+        )
+        return resp.body.value
+      },
+      setTimeouts: async (timeouts: { implicit?: number; pageLoad?: number; script?: number }) => {
+        await wdapi.call<void>(
+          this.serverURL,
+          this._api.TIMEOUTS_SET(session, timeouts)
+        )
+      },
+      getPageSource: async () => {
+        const resp = await wdapi.call<string>(
+          this.serverURL,
+          this._api.PAGESOURCE_GET(session)
+        )
+        return resp.body.value
+      },
+      printPage: async (options?: PrintOptions) => {
+        const resp = await wdapi.call<string>(
+          this.serverURL,
+          this._api.PAGE_PRINT(session, options)
+        )
+        return resp.body.value
+      },
+      performActions: async (actions: ActionSequence[]) => {
+        await wdapi.call<void>(
+          this.serverURL,
+          this._api.ACTIONS_PERFORM(session, actions)
+        )
+      },
+      releaseActions: async () => {
+        await wdapi.call<void>(
+          this.serverURL,
+          this._api.ACTIONS_RELEASE(session)
+        )
       },
       cookie: () => {
         return {

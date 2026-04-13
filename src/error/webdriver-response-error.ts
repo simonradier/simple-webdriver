@@ -1,5 +1,5 @@
-import { ErrorDef, ResponseDef } from '../interface'
-import { HttpResponse } from '../utils/http-client'
+import { ErrorDef, ResponseDef } from '../interface.js'
+import { HttpResponse } from '../utils/http-client.js'
 
 export class WebDriverResponseError extends Error {
   public httpResponse: HttpResponse<ResponseDef<ErrorDef>>

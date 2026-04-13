@@ -8,10 +8,10 @@ import {
   Element,
   Capabilities,
   BrowserType
-} from '../../src/swd'
-import { loggerConfiguration, LogLevel } from '../../src/utils/logger'
+} from '../../src/swd.js'
+import { loggerConfiguration, LogLevel } from '../../src/utils/logger.js'
 import nock from 'nock'
-import * as td from './data'
+import * as td from './data.js'
 
 chai.use(chaiAsPromised)
 

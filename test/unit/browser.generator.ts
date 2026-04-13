@@ -1,11 +1,11 @@
 import { expect } from 'chai'
 import nock from 'nock'
-import { Cookie } from '../../src'
-import { Browser, BrowserType } from '../../src/browser'
-import { loggerConfiguration, LogLevel } from '../../src/utils/logger'
-import { Using, WebDriver } from '../../src/webdriver'
-import { WindowType } from '../../src/window'
-import * as td from './data'
+import { Cookie } from '../../src/index.js'
+import { Browser, BrowserType } from '../../src/browser.js'
+import { loggerConfiguration, LogLevel } from '../../src/utils/logger.js'
+import { Using, WebDriver } from '../../src/webdriver.js'
+import { WindowType } from '../../src/window.js'
+import * as td from './data.js'
 
 export function generateBrowserTest(browserType: string) {
   describe('Browser', function () {
@@ -1090,6 +1090,130 @@ export function generateBrowserTest(browserType: string) {
         g_browser._closed = true
         await expect(g_browser.close()).to.be.rejectedWith(/closed/)
       })*/
+    })
+
+    describe('getTimeouts', function () {
+      it('should return the session timeouts if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_TIMEOUTS_GET_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .get(`/session/${td.WD_SESSION_ID}/timeouts`)
+          .reply(resp.code, resp.body, resp.headers)
+        const timeouts = await g_browser.getTimeouts()
+        expect(timeouts).to.not.be.null
+        expect(timeouts.implicit).to.equal(0)
+        expect(timeouts.pageLoad).to.equal(300000)
+        expect(timeouts.script).to.equal(30000)
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_TIMEOUTS_GET_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .get(`/session/${td.WD_SESSION_ID}/timeouts`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.getTimeouts()).to.be.rejected
+      })
+    })
+
+    describe('setTimeouts', function () {
+      it('should set the session timeouts if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_TIMEOUTS_SET_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/timeouts`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.setTimeouts({ implicit: 5000 })).to.be.fulfilled
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_TIMEOUTS_SET_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/timeouts`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.setTimeouts({ implicit: 5000 })).to.be.rejected
+      })
+    })
+
+    describe('getPageSource', function () {
+      it('should return the page source if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_PAGESOURCE_GET_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .get(`/session/${td.WD_SESSION_ID}/source`)
+          .reply(resp.code, resp.body, resp.headers)
+        const source = await g_browser.getPageSource()
+        expect(source).to.be.a('string')
+        expect(source).to.contain('<html>')
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_PAGESOURCE_GET_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .get(`/session/${td.WD_SESSION_ID}/source`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.getPageSource()).to.be.rejected
+      })
+    })
+
+    describe('printPage', function () {
+      it('should return a base64 PDF if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_PAGE_PRINT_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/print`)
+          .reply(resp.code, resp.body, resp.headers)
+        const pdf = await g_browser.printPage()
+        expect(pdf).to.be.a('string')
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_PAGE_PRINT_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/print`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.printPage()).to.be.rejected
+      })
+    })
+
+    describe('performActions', function () {
+      it('should perform actions if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_ACTIONS_PERFORM_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/actions`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(
+          g_browser.performActions([
+            {
+              type: 'key',
+              id: 'keyboard',
+              actions: [
+                { type: 'keyDown', value: 'a' },
+                { type: 'keyUp', value: 'a' }
+              ]
+            }
+          ])
+        ).to.be.fulfilled
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_ACTIONS_PERFORM_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .post(`/session/${td.WD_SESSION_ID}/actions`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(
+          g_browser.performActions([
+            { type: 'key', id: 'keyboard', actions: [{ type: 'keyDown', value: 'a' }] }
+          ])
+        ).to.be.rejected
+      })
+    })
+
+    describe('releaseActions', function () {
+      it('should release actions if the webdriver server response is successful | Nock Only', async function () {
+        const resp = td.WD_ACTIONS_RELEASE_RESPONSE.OK
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .delete(`/session/${td.WD_SESSION_ID}/actions`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.releaseActions()).to.be.fulfilled
+      })
+      it('should throw an error if the webdriver server return an error | Nock Only', async function () {
+        const resp = td.WD_ACTIONS_RELEASE_RESPONSE.KO
+        nock(td.WD_SERVER_URL_HTTP[browserType])
+          .delete(`/session/${td.WD_SESSION_ID}/actions`)
+          .reply(resp.code, resp.body, resp.headers)
+        await expect(g_browser.releaseActions()).to.be.rejected
+      })
     })
 
   })

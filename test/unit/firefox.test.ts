@@ -1,7 +1,7 @@
-import { generateBrowserTest } from './browser.generator'
-import { generateElementTest } from './element.generator'
-import { generateWebDriverTest } from './webdriver.generator'
-import { generateWindowTest } from './window.generator'
+import { generateBrowserTest } from './browser.generator.js'
+import { generateElementTest } from './element.generator.js'
+import { generateWebDriverTest } from './webdriver.generator.js'
+import { generateWindowTest } from './window.generator.js'
 
 describe('Browser : Firefox', function () {
   generateWebDriverTest('Firefox')

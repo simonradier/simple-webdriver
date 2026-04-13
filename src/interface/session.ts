@@ -1,4 +1,4 @@
-import { TimeoutsDef } from './timeouts'
+import { TimeoutsDef } from './timeouts.js'
 
 export interface SessionDef {
   sessionId: string

@@ -1,8 +1,10 @@
-import { Capabilities } from '..'
-import { WDAPIDef, RequestDef } from '../interface'
-import { CookieDef } from '../interface/cookie'
-import { Logger } from '../utils/logger'
-import { WebDriverRequest } from './webdriver-request'
+import { Capabilities } from '../index.js'
+import { WDAPIDef, RequestDef } from '../interface.js'
+import { ActionSequence } from '../interface/actions.js'
+import { CookieDef } from '../interface/cookie.js'
+import { PrintOptions } from '../interface/print.js'
+import { Logger } from '../utils/logger.js'
+import { WebDriverRequest } from './webdriver-request.js'
 
 export class W3C implements WDAPIDef {
   private static _initHttpOptions(request: RequestDef) {
@@ -462,6 +464,65 @@ export class W3C implements WDAPIDef {
     result.path = `session/${sessionId}/alert/text`
     result.requestOptions.method = 'POST'
     result.data = { text }
+    return result
+  }
+
+  STATUS(): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = 'status'
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  TIMEOUTS_GET(sessionId: string): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/timeouts`
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  TIMEOUTS_SET(sessionId: string, timeouts: { implicit?: number; pageLoad?: number; script?: number }): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/timeouts`
+    result.requestOptions.method = 'POST'
+    result.data = timeouts
+    return result
+  }
+
+  PAGESOURCE_GET(sessionId: string): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/source`
+    result.requestOptions.method = 'GET'
+    return result
+  }
+
+  PAGE_PRINT(sessionId: string, options: PrintOptions = {}): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/print`
+    result.requestOptions.method = 'POST'
+    result.data = options
+    return result
+  }
+
+  ACTIONS_PERFORM(sessionId: string, actions: ActionSequence[]): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/actions`
+    result.requestOptions.method = 'POST'
+    result.data = { actions }
+    return result
+  }
+
+  ACTIONS_RELEASE(sessionId: string): RequestDef {
+    const result = new WebDriverRequest()
+    W3C._initHttpOptions(result)
+    result.path = `session/${sessionId}/actions`
+    result.requestOptions.method = 'DELETE'
     return result
   }
 }

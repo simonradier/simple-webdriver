@@ -478,8 +478,10 @@ export const WD_WINDOW_OPEN = {
   OK: {
     code: 200,
     body: {
-      //@ts-ignore
-      value: WD_WINDOW2_ID
+      value: {
+        handle: WD_WINDOW2_ID,
+        type: 'tab'
+      }
     },
     headers: { 'Content-Type': 'application/json' }
   },
@@ -1079,6 +1081,163 @@ export const WD_COOKIE_CREATE = {
       value: {
         error: 'no such window',
         message: 'no such window',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_STATUS_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      value: {
+        ready: true,
+        message: 'server is ready'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_TIMEOUTS_GET_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      value: {
+        implicit: 0,
+        pageLoad: 300000,
+        script: 30000
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_TIMEOUTS_SET_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      //@ts-ignore
+      value: null
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_PAGESOURCE_GET_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      value: '<html><body><h1>Hello</h1></body></html>'
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_PAGE_PRINT_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      value: 'JVBER..base64encodedPDF'
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_ACTIONS_PERFORM_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      //@ts-ignore
+      value: null
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
+        stacktrace: 'this is a stack\ntrace'
+      }
+    },
+    headers: { 'Content-Type': 'application/json' }
+  }
+}
+
+export const WD_ACTIONS_RELEASE_RESPONSE = {
+  OK: {
+    code: 200,
+    body: {
+      //@ts-ignore
+      value: null
+    },
+    headers: { 'Content-Type': 'application/json' }
+  },
+  KO: {
+    code: 500,
+    body: {
+      value: {
+        error: 'unknown error',
+        message: 'internal server error',
         stacktrace: 'this is a stack\ntrace'
       }
     },

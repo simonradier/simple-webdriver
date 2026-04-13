@@ -1,7 +1,7 @@
-import { WebDriverError } from './error'
-import { WindowRect } from './interface'
-import { WebDriver } from './swd'
-import { Browser } from './swd'
+import { WebDriverError } from './error.js'
+import { WindowRect } from './interface.js'
+import { WebDriver } from './swd.js'
+import { Browser } from './swd.js'
 
 export enum WindowType {
   Tab = 'tab',

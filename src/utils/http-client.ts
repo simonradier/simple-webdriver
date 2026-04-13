@@ -1,6 +1,14 @@
 import { Blob } from 'buffer'
-import * as http from 'http'
-import * as https from 'https'
+import { createRequire } from 'module'
+import type * as httpTypes from 'http'
+import type * as httpsTypes from 'https'
+
+// Use createRequire to load http/https as CJS modules.
+// This ensures the returned objects are mutable, allowing
+// test libraries like nock to intercept requests.
+const require = createRequire(import.meta.url)
+const http = require('http') as typeof httpTypes
+const https = require('https') as typeof httpsTypes
 
 export class HttpResponse<T> {
   body: T
@@ -11,14 +19,14 @@ export class HttpResponse<T> {
 
 export async function call<T>(
   url: string,
-  httpOptions: http.RequestOptions | https.RequestOptions,
+  httpOptions: httpTypes.RequestOptions | httpsTypes.RequestOptions,
   body: any = null
 ): Promise<HttpResponse<T>> {
   return new Promise<HttpResponse<any>>((resolve, reject) => {
-    let req: http.ClientRequest
+    let req: httpTypes.ClientRequest
     const sBody = JSON.stringify(body)
     httpOptions.timeout = 1000 * 10
-    if (body) 
+    if (body)
       httpOptions.headers['Content-Length'] = new Blob([sBody]).size
     if (url.startsWith('https://')) {
       req = https.request(url, httpOptions)
@@ -35,6 +43,7 @@ export async function call<T>(
         if (res.statusCode == 302 || res.statusCode == 303) {
           const err = new Error('HTTPError : Unsupported 302/303 redirection')
           reject(err)
+          return
         }
         response.statusCode = res.statusCode
         response.statusMessage = res.statusMessage

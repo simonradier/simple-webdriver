@@ -1,5 +1,5 @@
-import { RequestOptions } from 'http'
-import { RequestDef } from '../interface'
+import type { RequestOptions } from 'http'
+import { RequestDef } from '../interface.js'
 
 export class WebDriverRequest implements RequestDef {
   public requestOptions: RequestOptions

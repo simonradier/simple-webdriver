@@ -155,7 +155,11 @@ export function generateWindowTest(browserType: string) {
       })
     })
     describe('fullscreen', function () {
-      it('should fullscreen the windows if the webdriver server response is successful', async function () {
+      // safaridriver hangs on session teardown after a fullscreen
+      // round-trip; same story as maximize/minimize elsewhere in the
+      // matrix. Keep the wire contract covered via nock and leave
+      // real-browser fullscreen to local runs.
+      it('should fullscreen the windows if the webdriver server response is successful | Nock Only', async function () {
         let resp = td.WD_WINDOW_FULLSCREEN.OK
         nock(td.WD_SERVER_URL_HTTP[browserType])
           .post(`/session/${td.WD_SESSION_ID}/window/fullscreen`)

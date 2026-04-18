@@ -23,6 +23,9 @@
     "test-wd-safari": "NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
     "test-wd-edge": "NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
     "test-wd-firefox": "NOCK_OFF=true mocha --retries 2 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test-cdp-chrome": "CDP_BROWSER=chrome mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
+    "test-cdp-edge": "CDP_BROWSER=msedge mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
+    "test-cdp-chromium": "CDP_BROWSER=chromium mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
     "coverage": "c8 report --reporter=text-lcov | coveralls",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write ."

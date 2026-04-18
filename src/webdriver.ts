@@ -1,23 +1,17 @@
 import { Element, Window, Capabilities, Browser } from './swd.js'
-import { HttpResponse } from './utils/http-client.js'
 import {
-  WindowRect,
-  ElementDef,
   SessionDef,
   TimeoutsDef,
-  WDAPIDef,
-  ResponseDef,
   CookieDef,
-  RequestDef,
-  ErrorDef,
   ActionSequence,
   PrintOptions
 } from './interface.js'
-import * as wdapi from './api.js'
 import { LocationError, WebDriverResponseError, WebDriverError } from './error.js'
 import { Logger } from './utils/logger.js'
 import { BrowserType } from './browser.js'
 import { WindowType } from './window.js'
+import { ProtocolDriver, ElementRef } from './driver/protocol-driver.js'
+import { W3CDriver } from './driver/w3c-driver.js'
 
 export enum Using {
   id = 'id',
@@ -36,168 +30,123 @@ export enum Protocol {
 }
 
 export class WebDriver {
-  private static _onGoingSessions: { [sessionId: string]: { url: URL; api: WDAPIDef } } =
-    {}
-
-  private static _supportedBrowser: string[] = [
-    'chrome',
-    'chromium',
-    'msedge',
-    'firefox',
-    'safari'
-  ]
+  private static _onGoingSessions: {
+    [sessionId: string]: { driver: ProtocolDriver }
+  } = {}
 
   public static defaultHeadless = false
 
-  private _api: WDAPIDef
-
-  private _w3c: boolean
-
+  private _driver: ProtocolDriver
   private _serverURL: URL
+
   public get serverURL() {
     return this._serverURL
   }
 
-  private findElementRequest(
+  /** @internal */
+  public get driver(): ProtocolDriver {
+    return this._driver
+  }
+
+  private async _resolveFindResult(
     session: string,
     using: Using,
     value: string,
     multiple: boolean,
-    element?: Element
-  ) {
-    // findElement vs FindElement in element
-    const elementOrDocument = element ? 'arguments[0]' : 'document'
-    const argNumber = element ? 1 : 0
-    const elementId = element ? element.toString() : null
-
-    let script: string = ''
-    let request: RequestDef
+    fromElement: Element | null
+  ): Promise<ElementRef | ElementRef[] | null> {
+    const elementOrDocument = fromElement ? 'arguments[0]' : 'document'
+    const argNumber = fromElement ? 1 : 0
+    const scriptArgs = fromElement ? [fromElement, value] : [value]
 
     switch (using) {
-      case Using.id:
-        script = multiple
+      case Using.id: {
+        const script = multiple
           ? `return [ document.getElementById(arguments[0]) ];`
           : `return document.getElementById(arguments[0]);`
-        if (element)
+        if (fromElement)
           Logger.warn(
             'Can\'t retreive inside an element for "id" locator, using document scope instead'
           )
-        request = this._api.EXECUTE_SYNC(session, script, [value])
-        break
-      case Using.name:
-        script =
+        const raw = await this._driver.executeSync(session, script, [value])
+        return extractElementsFromScript(raw, multiple)
+      }
+      case Using.name: {
+        const script =
           `return document.getElementsByName(arguments[0])` + (multiple ? '' : '[0]')
-        if (element)
+        if (fromElement)
           Logger.warn(
             'Can\'t retreive inside an element for "name" locator, using document scope instead'
           )
-        request = this._api.EXECUTE_SYNC(session, script, [value])
-        break
-      case Using.className:
-        script =
+        const raw = await this._driver.executeSync(session, script, [value])
+        return extractElementsFromScript(raw, multiple)
+      }
+      case Using.className: {
+        const script =
           `return ${elementOrDocument}.getElementsByClassName(arguments[${argNumber}])` +
           (multiple ? '' : '[0]')
-        if (element) request = this._api.EXECUTE_SYNC(session, script, [element, value])
-        else request = this._api.EXECUTE_SYNC(session, script, [value])
-        break
-      default:
-        if (element)
-          request = multiple
-            ? this._api.ELEMENT_FINDELEMENTS(session, elementId, using, value)
-            : this._api.ELEMENT_FINDELEMENT(session, elementId, using, value)
-        else
-          request = multiple
-            ? this._api.FINDELEMENTS(session, using, value)
-            : this._api.FINDELEMENT(session, using, value)
-        break
+        const raw = await this._driver.executeSync(session, script, scriptArgs)
+        return extractElementsFromScript(raw, multiple)
+      }
+      default: {
+        if (fromElement) {
+          const elementId = fromElement.toString()
+          return multiple
+            ? await this._driver.elementFindElements(session, elementId, using, value)
+            : await this._driver.elementFindElement(session, elementId, using, value)
+        }
+        return multiple
+          ? await this._driver.findElements(session, using, value)
+          : await this._driver.findElement(session, using, value)
+      }
     }
-    return request
   }
 
   /**
-   * Create a SimpleWebDriver object which allows to interact with a webdriver server
+   * Create a SimpleWebDriver object which allows to interact with a webdriver server.
+   * @deprecated Use {@link WebDriver.w3c} instead. Will be removed in a future major version.
    * @param serverURL The URL of the webdriver server
    * @param protocol The type of protocol (see Protocol enum)
    */
-
   public constructor(serverURL: string, protocol: Protocol = Protocol.W3C) {
     this._serverURL = new URL(serverURL)
     if (this.serverURL.protocol !== 'http:' && this.serverURL.protocol !== 'https:') {
-      const err = new TypeError('Invalid Protocol: Webdriver only supports http or https')
-      throw err
+      throw new TypeError('Invalid Protocol: Webdriver only supports http or https')
     }
-    this._api = new wdapi[protocol]()
+    if (protocol !== Protocol.W3C) {
+      throw new Error(
+        `Protocol ${protocol} is not implemented. Only W3C is currently supported.`
+      )
+    }
+    this._driver = new W3CDriver(this._serverURL)
   }
 
-  /**
-   * Query the server status
-   * @returns the server status object (ready state and metadata)
-   */
   public async status() {
-    const resp = await wdapi.call<{ ready: boolean; message: string }>(
-      this.serverURL,
-      this._api.STATUS()
-    )
-    return resp.body.value
+    return this._driver.getStatus()
   }
 
   /** @internal  */
   public browser(browser: Browser) {
     if (browser.closed) throw new WebDriverError('Browser session is closed.')
     const session = browser.session
+    const driver = this._driver
     return {
-      /**
-       *
-       */
-      getTitle: async () => {
-        const resp = await wdapi.call<string>(this.serverURL, this._api.GETTITLE(session))
-        return resp.body.value
-      },
-      /**
-       * Retreive a Window object which represent the current top level Window
-       * @returns a Window object of the current top level Window
-       */
+      getTitle: () => driver.getTitle(session),
       getCurrentWindow: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.WINDOW_GETHANDLE(session)
-        )
-        const result: Window = new Window(resp.body.value, browser, this)
-        return result
+        const handle = await driver.windowGetHandle(session)
+        return new Window(handle, browser, this)
       },
-      /**
-       * Retreive a list Window objects which represent all the opened windows
-       * @returns a list of Window objects related to the browser session
-       */
       getAllWindows: async () => {
-        const resp = await wdapi.call<string[]>(
-          this.serverURL,
-          this._api.WINDOW_GETHANDLES(session)
-        )
-        const result: Array<Window> = new Array<Window>()
-        for (const handle of resp.body.value) {
-          result.push(new Window(handle, browser, this))
-        }
-        return result
+        const handles = await driver.windowGetHandles(session)
+        return handles.map(h => new Window(h, browser, this))
       },
-      /**
-       * Open a new window or tab
-       * @returns the newly created Window object
-       */
       newWindow: async (type: WindowType) => {
-        const resp = await wdapi.call<{ handle: string; type: string }>(
-          this.serverURL,
-          this._api.WINDOW_CREATE(session, type)
-        )
-        return new Window(resp.body.value.handle, browser, this)
+        const res = await driver.windowCreate(session, type)
+        return new Window(res.handle, browser, this)
       },
-      /**
-       * Stop the browser session and close all related windows
-       * @returns void
-       */
       stop: async () => {
-        await wdapi.call<any>(this.serverURL, this._api.SESSION_STOP(session))
-        delete WebDriver._onGoingSessions[browser.session]
+        await driver.stopSession(session)
+        delete WebDriver._onGoingSessions[session]
       },
       findElement: async (
         using: Using,
@@ -208,376 +157,151 @@ export class WebDriver {
       ) => {
         let timer = true
         if (!timeout) timeout = browser.timeouts.implicit
-        let resp: HttpResponse<ResponseDef<ElementDef | ElementDef[] | ErrorDef>>
-        const request: RequestDef = this.findElementRequest(
-          session,
-          using,
-          value,
-          multiple,
-          fromElement
-        )
-        let error: WebDriverResponseError
 
-        // Calculate the best type of request depending of the type of lookup
+        let result: ElementRef | ElementRef[] | null = null
+        let lastError: Error | null = null
 
-        // Loop until the timeout callback is resolved or if the lookup succeded
         setTimeout(() => (timer = false), timeout)
+        let retryable = true
         do {
           try {
-            resp = await wdapi.call<ElementDef | ElementDef[]>(this.serverURL, request)
+            result = await this._resolveFindResult(
+              session,
+              using,
+              value,
+              multiple,
+              fromElement
+            )
           } catch (err) {
-            error = <WebDriverResponseError>err
-            resp = error.httpResponse
-            Logger.trace(resp || err)
+            lastError = err as Error
+            result = null
+            Logger.trace(err)
+            if (
+              !(err instanceof WebDriverResponseError) ||
+              !(err as WebDriverResponseError).httpResponse
+            ) {
+              retryable = false
+            }
           }
-          // findElements in element will return an empty array with a 200 Ok code, if nothing is found
         } while (
-          resp &&
-          (resp.body.value === null ||
-            (Array.isArray(resp.body.value) && resp.body.value.length === 0) ||
-            resp.statusCode !== 200) &&
+          retryable &&
+          (result === null ||
+            (Array.isArray(result) && result.length === 0)) &&
           timer
         )
 
         if (
-          resp &&
-          resp.statusCode === 200 &&
-          ((Array.isArray(resp.body.value) && resp.body.value.length !== 0) ||
-            (!Array.isArray(resp.body.value) && resp.body.value))
+          result &&
+          (!Array.isArray(result) || result.length > 0)
         ) {
-          // If the look up succeded
-          let result: Element | Element[]
-          if (Array.isArray(resp.body.value))
-            result = resp.body.value.map(elem => {
-              return new Element(
-                elem['element-6066-11e4-a52e-4f735466cecf'],
-                browser,
-                this
-              )
-            })
-          else
-            result = new Element(
-              resp.body.value['element-6066-11e4-a52e-4f735466cecf'],
-              browser,
-              this
-            )
-          return result
-        } else {
-          // if the lookup failed
-          if (resp && resp.statusCode < 500)
-            throw new LocationError(using, value, timeout)
-          else throw error
+          if (Array.isArray(result)) {
+            return result.map(id => new Element(id, browser, this))
+          }
+          return new Element(result, browser, this)
         }
+
+        if (lastError instanceof WebDriverResponseError) {
+          const sc = lastError.httpResponse?.statusCode
+          if (sc !== undefined && sc < 500) throw new LocationError(using, value, timeout)
+          throw lastError
+        }
+        throw new LocationError(using, value, timeout)
       },
-      executeSync: async (script: string | Function, ...args: any[]) => {
+      executeSync: async (script: string | Function, args: any[] = []) => {
         if (typeof script !== 'string')
           script = 'return (' + script + ').apply(null, arguments);'
-        const resp = await wdapi.call<any>(
-          this.serverURL,
-          this._api.EXECUTE_SYNC(session, script, ...args)
-        )
-        return resp.body.value
+        return driver.executeSync(session, script, args)
       },
-
-      executeAsync: async (script: string | Function, ...args: any[]) => {
+      executeAsync: async (script: string | Function, args: any[] = []) => {
         if (typeof script !== 'string')
           script = '(' + script + ').apply(null, arguments);'
-        const resp = await wdapi.call<any>(
-          this.serverURL,
-          this._api.EXECUTE_ASYNC(session, script, ...args)
-        )
-        return resp.body.value
+        return driver.executeAsync(session, script, args)
       },
-
       navigate: () => {
         return {
-          refresh: () => {
-            return wdapi.call<void>(this.serverURL, this._api.NAVIGATE_REFRESH(session))
-          },
-          to: (url: string) => {
-            return wdapi.call<void>(this.serverURL, this._api.NAVIGATE_TO(session, url))
-          },
-          /**
-           *
-           */
-          getCurrentURL: async () => {
-            const resp = await wdapi.call<string>(
-              this.serverURL,
-              this._api.NAVIGATE_CURRENTURL(session)
-            )
-            return resp.body.value
-          },
-          back: () => {
-            return wdapi.call<void>(this.serverURL, this._api.NAVIGATE_BACK(session))
-          },
-          forward: () => {
-            return wdapi.call<void>(this.serverURL, this._api.NAVIGATE_FORWARD(session))
-          }
+          refresh: () => driver.navigateRefresh(session),
+          to: (url: string) => driver.navigateTo(session, url),
+          getCurrentURL: () => driver.getCurrentUrl(session),
+          back: () => driver.navigateBack(session),
+          forward: () => driver.navigateForward(session)
         }
       },
-      screenshot: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.SCREENSHOT(session)
-        )
-        return resp.body.value
-      },
+      screenshot: () => driver.screenshot(session),
       frame: () => {
         return {
-          switch: async (frameId: string | number | null) => {
-            return wdapi.call<void>(
-              this._serverURL,
-              this._api.FRAME_SWITCH(session, frameId)
-            )
-          },
-          parent: async () => {
-            return wdapi.call<void>(this.serverURL, this._api.FRAME_TOPARENT(session))
-          }
+          switch: (frameId: string | number | null) =>
+            driver.frameSwitch(session, frameId),
+          parent: () => driver.frameToParent(session)
         }
       },
       alert: () => {
         return {
-          accept: () => {
-            return wdapi.call<void>(this._serverURL, this._api.ALERT_ACCEPT(session))
-          },
-          dismiss: () => {
-            return wdapi.call<void>(this._serverURL, this._api.ALERT_DISMISS(session))
-          },
-          sendText: (text : string) => {
-            return wdapi.call<void>(this._serverURL, this._api.ALERT_SENDTEXT(session, text))
-          },
-          getText: async () => {
-            const resp = await wdapi.call<string>(this._serverURL, this._api.ALERT_GETTEXT(session))
-            return resp.body.value
-          },
+          accept: () => driver.alertAccept(session),
+          dismiss: () => driver.alertDismiss(session),
+          sendText: (text: string) => driver.alertSendText(session, text),
+          getText: () => driver.alertGetText(session)
         }
       },
-      getTimeouts: async () => {
-        const resp = await wdapi.call<TimeoutsDef>(
-          this.serverURL,
-          this._api.TIMEOUTS_GET(session)
-        )
-        return resp.body.value
-      },
-      setTimeouts: async (timeouts: { implicit?: number; pageLoad?: number; script?: number }) => {
-        await wdapi.call<void>(
-          this.serverURL,
-          this._api.TIMEOUTS_SET(session, timeouts)
-        )
-      },
-      getPageSource: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.PAGESOURCE_GET(session)
-        )
-        return resp.body.value
-      },
-      printPage: async (options?: PrintOptions) => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.PAGE_PRINT(session, options)
-        )
-        return resp.body.value
-      },
-      performActions: async (actions: ActionSequence[]) => {
-        await wdapi.call<void>(
-          this.serverURL,
-          this._api.ACTIONS_PERFORM(session, actions)
-        )
-      },
-      releaseActions: async () => {
-        await wdapi.call<void>(
-          this.serverURL,
-          this._api.ACTIONS_RELEASE(session)
-        )
-      },
+      getTimeouts: () => driver.timeoutsGet(session),
+      setTimeouts: (timeouts: {
+        implicit?: number
+        pageLoad?: number
+        script?: number
+      }) => driver.timeoutsSet(session, timeouts),
+      getPageSource: () => driver.getPageSource(session),
+      printPage: (options?: PrintOptions) => driver.pagePrint(session, options),
+      performActions: (actions: ActionSequence[]) =>
+        driver.actionsPerform(session, actions),
+      releaseActions: () => driver.actionsRelease(session),
       cookie: () => {
         return {
-          get: async (name: string) => {
-            const resp = await wdapi.call<CookieDef>(
-              this.serverURL,
-              this._api.COOKIE_GET(session, name)
-            )
-            return resp.body.value
-          },
-
-          getAll: async () => {
-            const resp = await wdapi.call<CookieDef[]>(
-              this.serverURL,
-              this._api.COOKIE_GETALL(session)
-            )
-            return resp.body.value
-          },
-          create: async (cookie: CookieDef) => {
-            return wdapi.call<void>(
-              this.serverURL,
-              this._api.COOKIE_CREATE(session, cookie)
-            )
-          },
-          update: async (cookie: CookieDef) => {
-            await wdapi.call<void>(
-              this.serverURL,
-              this._api.COOKIE_CREATE(session, cookie)
-            )
-          },
-          delete: async (name: string) => {
-            return wdapi.call<void>(
-              this.serverURL,
-              this._api.COOKIE_DELETE(session, name)
-            )
-          },
-          deleteAll: () => {
-            return wdapi.call<void>(this.serverURL, this._api.COOKIE_DELETEALL(session))
-          }
+          get: (name: string) => driver.cookieGet(session, name),
+          getAll: () => driver.cookieGetAll(session),
+          create: (cookie: CookieDef) => driver.cookieCreate(session, cookie),
+          update: (cookie: CookieDef) => driver.cookieCreate(session, cookie),
+          delete: (name: string) => driver.cookieDelete(session, name),
+          deleteAll: () => driver.cookieDeleteAll(session)
         }
       }
     }
   }
 
-  /**
-   * Allow to access windows capabilities, if no window is provided, it will modify the current top level context
-   * @param handle
-   * @internal
-   */
+  /** @internal */
   public window(window: Window = null) {
+    const driver = this._driver
     return {
-      setSize: async (width: number, height: number) => {
-        const resp = await wdapi.call<WindowRect>(
-          this.serverURL,
-          this._api.WINDOW_SETRECT(window.session, width, height)
-        )
-        return resp.body.value
-      },
-      getSize: async () => {
-        const resp = await wdapi.call<WindowRect>(
-          this.serverURL,
-          this._api.WINDOW_GETRECT(window.session)
-        )
-        return resp.body.value
-      },
-      maximize: async () => {
-        const resp = await wdapi.call<WindowRect>(
-          this.serverURL,
-          this._api.WINDOW_MAXIMIZE(window.session)
-        )
-        return resp.body.value
-      },
-      minimize: async () => {
-        const resp = await wdapi.call<WindowRect>(
-          this.serverURL,
-          this._api.WINDOW_MINIMIZE(window.session)
-        )
-        return resp.body.value
-      },
-      fullscreen: async () => {
-        const resp = await wdapi.call<WindowRect>(
-          this.serverURL,
-          this._api.WINDOW_FULLSCREEN(window.session)
-        )
-        return resp.body.value
-      },
-      switch: async () => {
-        return await wdapi.call<void>(
-          this.serverURL,
-          this._api.WINDOW_SWITCH(window.session, window.handle)
-        )
-      },
-      close: () => {
-        return wdapi.call<void>(this.serverURL, this._api.WINDOW_CLOSE(window.session))
-      }
+      setSize: (width: number, height: number) =>
+        driver.windowSetRect(window.session, width, height),
+      getSize: () => driver.windowGetRect(window.session),
+      maximize: () => driver.windowMaximize(window.session),
+      minimize: () => driver.windowMinimize(window.session),
+      fullscreen: () => driver.windowFullscreen(window.session),
+      switch: () => driver.windowSwitch(window.session, window.handle),
+      close: () => driver.windowClose(window.session)
     }
   }
 
-  /**
-   * @internal
-   * @param element
-   * @returns
-   */
+  /** @internal */
   public element(element: Element = null) {
     const elementId = element.toString()
     const session = element.session
+    const driver = this._driver
     return {
-      click: async () => {
-        await wdapi.call<void>(
-          this.serverURL,
-          this._api.ELEMENT_CLICK(session, elementId)
-        )
-      },
-      clear: async () => {
-        await wdapi.call<void>(
-          this.serverURL,
-          this._api.ELEMENT_CLEAR(session, elementId)
-        )
-      },
-      sendKeys: async (keys: string) => {
-        await wdapi.call<any>(
-          this.serverURL,
-          this._api.ELEMENT_SENDKEYS(session, elementId, keys)
-        )
-      },
-      getValue: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETPROPERTY(session, elementId, 'value')
-        )
-        return resp.body.value
-      },
-      getText: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETTEXT(session, elementId)
-        )
-        return resp.body.value
-      },
-      getAttribute: async (attributeName: string) => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETATTRIBUTE(session, elementId, attributeName)
-        )
-        return resp.body.value
-      },
-      getProperty: async (propertyName: string) => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETPROPERTY(session, elementId, propertyName)
-        )
-        return resp.body.value
-      },
-      getTagName: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETTAGNAME(session, elementId)
-        )
-        return resp.body.value
-      },
-      getCSSValue: async (cssPropertyName: string) => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_GETCSS(session, elementId, cssPropertyName)
-        )
-        return resp.body.value
-      },
-      isSelected: async () => {
-        const resp = await wdapi.call<boolean>(
-          this.serverURL,
-          this._api.ELEMENT_ISSELECTED(session, elementId)
-        )
-        return resp.body.value
-      },
-      isEnabled: async () => {
-        const resp = await wdapi.call<boolean>(
-          this.serverURL,
-          this._api.ELEMENT_ISENABLED(session, elementId)
-        )
-        return resp.body.value
-      },
-      screenshot: async () => {
-        const resp = await wdapi.call<string>(
-          this.serverURL,
-          this._api.ELEMENT_SCREENSHOT(session, elementId)
-        )
-        return resp.body.value
-      },
+      click: () => driver.elementClick(session, elementId),
+      clear: () => driver.elementClear(session, elementId),
+      sendKeys: (keys: string) => driver.elementSendKeys(session, elementId, keys),
+      getValue: () => driver.elementGetProperty(session, elementId, 'value'),
+      getText: () => driver.elementGetText(session, elementId),
+      getAttribute: (attributeName: string) =>
+        driver.elementGetAttribute(session, elementId, attributeName),
+      getProperty: (propertyName: string) =>
+        driver.elementGetProperty(session, elementId, propertyName),
+      getTagName: () => driver.elementGetTagName(session, elementId),
+      getCSSValue: (cssPropertyName: string) =>
+        driver.elementGetCss(session, elementId, cssPropertyName),
+      isSelected: () => driver.elementIsSelected(session, elementId),
+      isEnabled: () => driver.elementIsEnabled(session, elementId),
+      screenshot: () => driver.elementScreenshot(session, elementId),
       findElement: async (using: Using, value: string, timeout: number = null) => {
         return <Promise<Element>>(
           this.browser(element.browser).findElement(using, value, timeout, false, element)
@@ -595,28 +319,25 @@ export class WebDriver {
     browserType: BrowserType,
     capabilities: Capabilities = new Capabilities(browserType)
   ): Promise<Browser> {
-    const resp = await wdapi.call<SessionDef>(
-      this.serverURL,
-      this._api.SESSION_START(browserType, capabilities)
-    )
-    let error: WebDriverResponseError
+    const session: SessionDef = await this._driver.startSession(browserType, capabilities)
+    let error: WebDriverResponseError | undefined
 
-    if (!resp.body.value) {
-      error = new WebDriverResponseError(resp)
+    if (!session) {
+      error = new WebDriverResponseError({ body: { value: null } } as any)
       error.message = 'Response is empty or null'
       Logger.error('Response is empty or null')
     } else {
-      if (!resp.body.value.sessionId) {
-        error = new WebDriverResponseError(resp)
+      if (!session.sessionId) {
+        error = new WebDriverResponseError({ body: { value: session } } as any)
         error.message = 'Missing property sessionId'
         Logger.error('Missing property sessionId')
-      } else if (!resp.body.value.capabilities) {
-        error = new WebDriverResponseError(resp)
+      } else if (!session.capabilities) {
+        error = new WebDriverResponseError({ body: { value: session } } as any)
         error.message = 'Missing property capabilities'
         Logger.error('Missing property capabilities')
-      } else if (!resp.body.value.capabilities.timeouts) {
+      } else if (!session.capabilities.timeouts) {
         Logger.warn('No timeouts provided by Webdriver server')
-        resp.body.value.capabilities.timeouts = {
+        session.capabilities.timeouts = {
           implicit: 0,
           pageLoad: 3000,
           script: 30000
@@ -626,10 +347,10 @@ export class WebDriver {
     if (error) {
       throw error
     }
-    const session: string = resp.body.value.sessionId
-    const timeouts: TimeoutsDef = resp.body.value.capabilities.timeouts
-    const browser = new Browser(session, browserType, timeouts, this)
-    WebDriver._onGoingSessions[session] = { url: this.serverURL, api: this._api }
+    const sessionId: string = session.sessionId
+    const timeouts: TimeoutsDef = session.capabilities.timeouts
+    const browser = new Browser(sessionId, browserType, timeouts, this)
+    WebDriver._onGoingSessions[sessionId] = { driver: this._driver }
     return browser
   }
 
@@ -637,7 +358,7 @@ export class WebDriver {
     for (const sessionId in WebDriver._onGoingSessions) {
       try {
         const inf = WebDriver._onGoingSessions[sessionId]
-        await wdapi.call<any>(inf.url, inf.api.SESSION_STOP(sessionId))
+        await inf.driver.stopSession(sessionId)
         Logger.info('Cleaned session : ' + sessionId)
       } catch (e) {
         Logger.warn("Can't stop ongoing session : " + sessionId)
@@ -645,4 +366,27 @@ export class WebDriver {
     }
     WebDriver._onGoingSessions = {}
   }
+}
+
+const W3C_ELEMENT_KEY = 'element-6066-11e4-a52e-4f735466cecf'
+
+function extractElementsFromScript(
+  raw: any,
+  multiple: boolean
+): ElementRef | ElementRef[] | null {
+  if (multiple) {
+    if (Array.isArray(raw)) {
+      return raw
+        .map(v => (v && typeof v === 'object' ? v[W3C_ELEMENT_KEY] : null))
+        .filter((id): id is string => typeof id === 'string')
+    }
+    if (raw && typeof raw === 'object') {
+      const id = raw[W3C_ELEMENT_KEY]
+      return typeof id === 'string' ? [id] : []
+    }
+    return []
+  }
+  if (!raw || typeof raw !== 'object') return null
+  const id = raw[W3C_ELEMENT_KEY]
+  return typeof id === 'string' ? id : null
 }

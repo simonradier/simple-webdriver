@@ -174,42 +174,133 @@ export class CDPDriver implements ProtocolDriver {
     return typeof res.result.value === 'string' ? res.result.value : ''
   }
 
-  async windowGetHandle(_s: string): Promise<string> {
-    throw notImpl('windowGetHandle')
-  }
-  async windowGetHandles(_s: string): Promise<string[]> {
-    throw notImpl('windowGetHandles')
-  }
-  async windowCreate(_s: string, _t: 'tab' | 'window'): Promise<WindowCreateResult> {
-    throw notImpl('windowCreate')
-  }
-  async windowClose(_s: string): Promise<void> {
-    throw notImpl('windowClose')
-  }
-  async windowSwitch(_s: string, _h: string): Promise<void> {
-    throw notImpl('windowSwitch')
-  }
-  async windowGetRect(_s: string): Promise<WindowRect> {
-    throw notImpl('windowGetRect')
-  }
-  async windowSetRect(_s: string, _w: number, _h: number): Promise<WindowRect> {
-    throw notImpl('windowSetRect')
-  }
-  async windowMaximize(_s: string): Promise<WindowRect> {
-    throw notImpl('windowMaximize')
-  }
-  async windowMinimize(_s: string): Promise<WindowRect> {
-    throw notImpl('windowMinimize')
-  }
-  async windowFullscreen(_s: string): Promise<WindowRect> {
-    throw notImpl('windowFullscreen')
+  async windowGetHandle(sessionId: string): Promise<string> {
+    return this._requireSession(sessionId).targetId
   }
 
-  async frameSwitch(_s: string, _f: string | number | null): Promise<void> {
-    throw notImpl('frameSwitch')
+  async windowGetHandles(sessionId: string): Promise<string[]> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{
+      targetInfos: Array<{ targetId: string; type: string }>
+    }>('Target.getTargets', {})
+    return res.targetInfos
+      .filter(t => t.type === 'page')
+      .map(t => t.targetId)
   }
-  async frameToParent(_s: string): Promise<void> {
-    throw notImpl('frameToParent')
+
+  async windowCreate(
+    sessionId: string,
+    type: 'tab' | 'window'
+  ): Promise<WindowCreateResult> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{ targetId: string }>(
+      'Target.createTarget',
+      { url: 'about:blank', newWindow: type === 'window' }
+    )
+    return { handle: res.targetId, type }
+  }
+
+  async windowClose(sessionId: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    await session.client.send('Target.closeTarget', {
+      targetId: session.targetId
+    })
+  }
+
+  async windowSwitch(sessionId: string, handle: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    if (session.targetId === handle) return
+    const attach = await session.client.send<{ sessionId: string }>(
+      'Target.attachToTarget',
+      { targetId: handle, flatten: true }
+    )
+    session.targetId = handle
+    session.cdpSessionId = attach.sessionId
+    session.elementRefs.clear()
+    await session.client
+      .send('Page.enable', {}, session.cdpSessionId)
+      .catch(() => undefined)
+    await session.client
+      .send('Runtime.enable', {}, session.cdpSessionId)
+      .catch(() => undefined)
+    await session.client
+      .send('DOM.enable', {}, session.cdpSessionId)
+      .catch(() => undefined)
+    await session.client
+      .send('Network.enable', {}, session.cdpSessionId)
+      .catch(() => undefined)
+  }
+
+  async windowGetRect(sessionId: string): Promise<WindowRect> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{
+      bounds: { left?: number; top?: number; width?: number; height?: number }
+    }>('Browser.getWindowForTarget', { targetId: session.targetId })
+    return {
+      x: res.bounds.left ?? 0,
+      y: res.bounds.top ?? 0,
+      width: res.bounds.width ?? 0,
+      height: res.bounds.height ?? 0
+    }
+  }
+
+  async windowSetRect(
+    sessionId: string,
+    width: number,
+    height: number
+  ): Promise<WindowRect> {
+    return this._setWindowBounds(sessionId, {
+      width,
+      height,
+      windowState: 'normal'
+    })
+  }
+
+  async windowMaximize(sessionId: string): Promise<WindowRect> {
+    return this._setWindowBounds(sessionId, { windowState: 'maximized' })
+  }
+
+  async windowMinimize(sessionId: string): Promise<WindowRect> {
+    return this._setWindowBounds(sessionId, { windowState: 'minimized' })
+  }
+
+  async windowFullscreen(sessionId: string): Promise<WindowRect> {
+    return this._setWindowBounds(sessionId, { windowState: 'fullscreen' })
+  }
+
+  async frameSwitch(
+    sessionId: string,
+    frameId: string | number | null
+  ): Promise<void> {
+    this._requireSession(sessionId)
+    if (frameId === null) return
+    throw notImpl('frameSwitch(non-null)')
+  }
+
+  async frameToParent(sessionId: string): Promise<void> {
+    this._requireSession(sessionId)
+  }
+
+  private async _setWindowBounds(
+    sessionId: string,
+    bounds: {
+      width?: number
+      height?: number
+      left?: number
+      top?: number
+      windowState?: 'normal' | 'minimized' | 'maximized' | 'fullscreen'
+    }
+  ): Promise<WindowRect> {
+    const session = this._requireSession(sessionId)
+    const win = await session.client.send<{ windowId: number }>(
+      'Browser.getWindowForTarget',
+      { targetId: session.targetId }
+    )
+    await session.client.send('Browser.setWindowBounds', {
+      windowId: win.windowId,
+      bounds
+    })
+    return this.windowGetRect(sessionId)
   }
 
   async findElement(

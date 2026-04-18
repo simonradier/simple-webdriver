@@ -718,7 +718,8 @@ export class CDPDriver implements ProtocolDriver {
     // For now any arg that looks like a W3C element wrapper is passed as
     // a plain object, which will not be a live DOM node in the page.
     const expression = `(function() {${script}}).apply(null, ${JSON.stringify(args)})`
-    const res = await session.client.send<{
+    const scriptTimeout = session.timeouts.script
+    const evalPromise = session.client.send<{
       result: { value?: any }
       exceptionDetails?: { text: string; exception?: { description?: string } }
     }>(
@@ -726,6 +727,13 @@ export class CDPDriver implements ProtocolDriver {
       { expression, returnByValue: true, awaitPromise },
       session.cdpSessionId
     )
+    const res = scriptTimeout > 0
+      ? await withTimeout(
+          evalPromise,
+          scriptTimeout,
+          `Script timed out after ${scriptTimeout}ms`
+        )
+      : await evalPromise
     if (res.exceptionDetails) {
       const msg =
         res.exceptionDetails.exception?.description ?? res.exceptionDetails.text
@@ -1056,6 +1064,22 @@ function notImpl(method: string): CDPNotImplementedError {
   return new CDPNotImplementedError(
     `CDPDriver.${method} is not yet implemented — landing incrementally in F7-F17`
   )
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms)
+    promise.then(
+      v => {
+        clearTimeout(timer)
+        resolve(v)
+      },
+      e => {
+        clearTimeout(timer)
+        reject(e)
+      }
+    )
+  })
 }
 
 function waitForFrameStopped(session: CDPSessionState): Promise<void> {

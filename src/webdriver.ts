@@ -12,8 +12,8 @@ import { BrowserType } from './browser.js'
 import { WindowType } from './window.js'
 import { ProtocolDriver, ElementRef } from './driver/protocol-driver.js'
 import { W3CDriver } from './driver/w3c-driver.js'
+import { CDPDriver } from './driver/cdp-driver.js'
 import { CDPOptions } from './cdp/options.js'
-import { CDPNotImplementedError } from './cdp/errors.js'
 
 export enum Using {
   id = 'id',
@@ -139,16 +139,16 @@ export class WebDriver {
    * a Chromium-based browser. The library launches and manages the browser
    * process itself (no external driver binary required).
    *
-   * Not yet implemented — throws {@link CDPNotImplementedError}. The options
-   * shape is stable and safe to pass today.
+   * Only `startSession` / `stopSession` / `getStatus` are wired up today;
+   * other operations throw until they land incrementally.
    *
    * @param options Browser launch configuration.
    */
   public static cdp(options: CDPOptions = {}): WebDriver {
-    // Reference options so the parameter is not flagged as unused and so
-    // the argument flows through a real code path once the CDP driver lands.
-    void options
-    throw new CDPNotImplementedError()
+    const wd = Object.create(WebDriver.prototype) as WebDriver
+    ;(wd as any)._driver = new CDPDriver(options)
+    ;(wd as any)._serverURL = new URL('cdp://localhost')
+    return wd
   }
 
   public async status() {

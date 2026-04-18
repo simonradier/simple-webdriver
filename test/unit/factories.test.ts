@@ -1,9 +1,5 @@
 import { expect } from 'chai'
-import {
-  CDPNotImplementedError,
-  Protocol,
-  WebDriver
-} from '../../src/index.js'
+import { Protocol, WebDriver } from '../../src/index.js'
 
 describe('WebDriver factories', function () {
   describe('WebDriver.w3c', function () {
@@ -25,12 +21,25 @@ describe('WebDriver factories', function () {
   })
 
   describe('WebDriver.cdp', function () {
-    it('throws CDPNotImplementedError until the CDP driver lands', function () {
-      expect(() => WebDriver.cdp({ browser: 'chrome' })).to.throw(CDPNotImplementedError)
+    it('returns a WebDriver instance (CDP driver)', function () {
+      const wd = WebDriver.cdp({ browser: 'chrome' })
+      expect(wd).to.be.instanceOf(WebDriver)
     })
 
     it('accepts an empty options object', function () {
-      expect(() => WebDriver.cdp()).to.throw(CDPNotImplementedError)
+      const wd = WebDriver.cdp()
+      expect(wd).to.be.instanceOf(WebDriver)
+    })
+
+    it('start() without a valid browser binary rejects', async function () {
+      const wd = WebDriver.cdp({ browser: 'chrome', executablePath: '/no/such/bin' })
+      let caught: unknown
+      try {
+        await wd.start('chrome' as any)
+      } catch (e) {
+        caught = e
+      }
+      expect(caught).to.be.instanceOf(Error)
     })
   })
 })

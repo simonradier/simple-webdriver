@@ -126,8 +126,12 @@ export function generateWindowTest(browserType: string) {
     })
 
     describe('minimize', function () {
-      it('should minimize the windows if the webdriver server response is successful', async function () {
-        if (process.platform == 'linux') return
+      // After the minimize round-trip geckodriver hangs on session
+      // teardown under xvfb (Ubuntu CI), tripping the mocha hook
+      // timeout even though the assertion itself succeeded. Keep
+      // covering the wire contract on the mocked path; real-browser
+      // minimize is left to local runs.
+      it('should minimize the windows if the webdriver server response is successful | Nock Only', async function () {
         let resp = td.WD_WINDOW_MINIMIZE.OK
         nock(td.WD_SERVER_URL_HTTP[browserType])
           .post(`/session/${td.WD_SESSION_ID}/window/minimize`)

@@ -23,7 +23,7 @@ export interface LaunchedBrowser {
   close(): Promise<void>
 }
 
-const DEFAULT_ARGS: readonly string[] = [
+const defaultArgs: readonly string[] = [
   '--no-first-run',
   '--no-default-browser-check',
   '--disable-default-apps',
@@ -35,9 +35,9 @@ const DEFAULT_ARGS: readonly string[] = [
   '--disable-features=Translate,BackForwardCache'
 ]
 
-const READINESS_TIMEOUT_MS = 30_000
-const READINESS_POLL_MS = 100
-const GRACEFUL_SHUTDOWN_MS = 5_000
+const readinessTimeoutMs = 30_000
+const readinessPollMs = 100
+const gracefulShutdownMs = 5_000
 
 export async function launch(options: CDPOptions = {}): Promise<LaunchedBrowser> {
   const browser: CDPBrowser = options.browser ?? 'chrome'
@@ -49,7 +49,7 @@ export async function launch(options: CDPOptions = {}): Promise<LaunchedBrowser>
     options.userDataDir ?? (await mkdtemp(path.join(os.tmpdir(), 'swd-cdp-')))
 
   const args = [
-    ...DEFAULT_ARGS,
+    ...defaultArgs,
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${userDataDir}`
   ]
@@ -80,7 +80,7 @@ export async function launch(options: CDPOptions = {}): Promise<LaunchedBrowser>
   }
 
   try {
-    const version = await waitForDebugger(port, READINESS_TIMEOUT_MS, () => exited)
+    const version = await waitForDebugger(port, readinessTimeoutMs, () => exited)
     return {
       process: proc,
       port,
@@ -93,11 +93,11 @@ export async function launch(options: CDPOptions = {}): Promise<LaunchedBrowser>
           return
         }
         proc.kill('SIGTERM')
-        const killed = await waitForExit(proc, GRACEFUL_SHUTDOWN_MS)
+        const killed = await waitForExit(proc, gracefulShutdownMs)
         if (!killed) {
           Logger.warn(`${browser} did not exit after SIGTERM, sending SIGKILL`)
           proc.kill('SIGKILL')
-          await waitForExit(proc, GRACEFUL_SHUTDOWN_MS)
+          await waitForExit(proc, gracefulShutdownMs)
         }
         await cleanupTempDir()
       }
@@ -131,7 +131,7 @@ async function waitForDebugger(
     } catch (e) {
       lastError = e
     }
-    await sleep(READINESS_POLL_MS)
+    await sleep(readinessPollMs)
   }
   throw new Error(
     `Timed out after ${timeoutMs}ms waiting for browser debugger on port ${port}` +

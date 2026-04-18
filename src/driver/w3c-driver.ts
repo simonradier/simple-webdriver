@@ -16,7 +16,7 @@ import {
   WindowCreateResult
 } from './protocol-driver.js'
 
-const W3C_ELEMENT_KEY = 'element-6066-11e4-a52e-4f735466cecf'
+const w3cElementKey = 'element-6066-11e4-a52e-4f735466cecf'
 
 function isNotFound(err: unknown): boolean {
   if (err instanceof WebDriverResponseError) {
@@ -28,7 +28,7 @@ function isNotFound(err: unknown): boolean {
 
 function extractElementId(value: unknown): ElementRef | null {
   if (!value || typeof value !== 'object') return null
-  const id = (value as ElementDef)[W3C_ELEMENT_KEY]
+  const id = (value as ElementDef)[w3cElementKey]
   return typeof id === 'string' ? id : null
 }
 

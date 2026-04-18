@@ -390,7 +390,7 @@ export class WebDriver {
         const inf = WebDriver._onGoingSessions[sessionId]
         await inf.driver.stopSession(sessionId)
         Logger.info('Cleaned session : ' + sessionId)
-      } catch (e) {
+      } catch {
         Logger.warn("Can't stop ongoing session : " + sessionId)
       }
     }
@@ -398,7 +398,7 @@ export class WebDriver {
   }
 }
 
-const W3C_ELEMENT_KEY = 'element-6066-11e4-a52e-4f735466cecf'
+const w3cElementKey = 'element-6066-11e4-a52e-4f735466cecf'
 
 function extractElementsFromScript(
   raw: any,
@@ -407,16 +407,16 @@ function extractElementsFromScript(
   if (multiple) {
     if (Array.isArray(raw)) {
       return raw
-        .map(v => (v && typeof v === 'object' ? v[W3C_ELEMENT_KEY] : null))
+        .map(v => (v && typeof v === 'object' ? v[w3cElementKey] : null))
         .filter((id): id is string => typeof id === 'string')
     }
     if (raw && typeof raw === 'object') {
-      const id = raw[W3C_ELEMENT_KEY]
+      const id = raw[w3cElementKey]
       return typeof id === 'string' ? [id] : []
     }
     return []
   }
   if (!raw || typeof raw !== 'object') return null
-  const id = raw[W3C_ELEMENT_KEY]
+  const id = raw[w3cElementKey]
   return typeof id === 'string' ? id : null
 }

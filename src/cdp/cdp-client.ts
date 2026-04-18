@@ -15,7 +15,7 @@ interface Pending {
   reject: (err: Error) => void
 }
 
-const DEFAULT_CONNECT_TIMEOUT_MS = 30_000
+const defaultConnectTimeoutMs = 30_000
 
 /**
  * Minimal Chrome DevTools Protocol client over WebSocket.
@@ -42,7 +42,7 @@ export class CDPClient {
     return !!this._ws && this._ws.readyState === WebSocket.OPEN
   }
 
-  async connect(timeoutMs: number = DEFAULT_CONNECT_TIMEOUT_MS): Promise<void> {
+  async connect(timeoutMs: number = defaultConnectTimeoutMs): Promise<void> {
     if (this._ws) throw new CDPConnectionError('CDP client already connected')
     return new Promise<void>((resolve, reject) => {
       let settled = false

@@ -37,7 +37,7 @@ interface CDPSessionState {
   pendingPromptText: string | null
 }
 
-const DEFAULT_TIMEOUTS: TimeoutsDef = {
+const defaultTimeouts: TimeoutsDef = {
   implicit: 0,
   pageLoad: 300_000,
   script: 30_000
@@ -82,7 +82,7 @@ export class CDPDriver implements ProtocolDriver {
         targetId: target.targetId,
         cdpSessionId: attach.sessionId,
         browserVersion: versionInfo.Browser ?? 'unknown',
-        timeouts: { ...DEFAULT_TIMEOUTS },
+        timeouts: { ...defaultTimeouts },
         elementRefs: new ElementRefStore(),
         pendingDialog: null,
         pendingPromptText: null
@@ -398,7 +398,7 @@ export class CDPDriver implements ProtocolDriver {
       const res = await session.client.send<{ result: RemoteObject }>(
         'Runtime.callFunctionOn',
         {
-          functionDeclaration: `function(value, using, multiple) { return (${LOCATOR_FN})(value, this, using, multiple) }`,
+          functionDeclaration: `function(value, using, multiple) { return (${locatorFn})(value, this, using, multiple) }`,
           objectId: scopeObjectId,
           arguments: [
             { value: value },
@@ -414,7 +414,7 @@ export class CDPDriver implements ProtocolDriver {
     const res = await session.client.send<{ result: RemoteObject }>(
       'Runtime.evaluate',
       {
-        expression: `(${LOCATOR_FN})(${JSON.stringify(value)}, document, ${JSON.stringify(using)}, ${multiple})`,
+        expression: `(${locatorFn})(${JSON.stringify(value)}, document, ${JSON.stringify(using)}, ${multiple})`,
         returnByValue: false
       },
       session.cdpSessionId
@@ -1029,7 +1029,7 @@ interface RemoteObject {
  * strategy name + value + multiple flag, and returns either a single
  * Element (or null) or an array of Elements. Bound to `scope` parameter.
  */
-const LOCATOR_FN = `function(value, scope, using, multiple) {
+const locatorFn = `function(value, scope, using, multiple) {
   scope = scope || document;
   switch (using) {
     case 'css selector':
@@ -1176,7 +1176,7 @@ function buildSessionDef(
       proxy: {},
       setWindowRect: true,
       strictFileInteractability: false,
-      timeouts: { ...DEFAULT_TIMEOUTS },
+      timeouts: { ...defaultTimeouts },
       unhandledPromptBehavior: 'dismiss and notify',
       'webauthn:virtualAuthenticators': true
     }

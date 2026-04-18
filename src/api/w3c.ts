@@ -3,7 +3,6 @@ import { WDAPIDef, RequestDef } from '../interface.js'
 import { ActionSequence } from '../interface/actions.js'
 import { CookieDef } from '../interface/cookie.js'
 import { PrintOptions } from '../interface/print.js'
-import { Logger } from '../utils/logger.js'
 import { WebDriverRequest } from './webdriver-request.js'
 
 export class W3C implements WDAPIDef {

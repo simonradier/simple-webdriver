@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import { launch, LaunchedBrowser } from '../cdp/browser-launcher.js'
 import { CDPClient } from '../cdp/cdp-client.js'
+import { ElementRefStore } from '../cdp/element-ref-store.js'
 import { CDPNotImplementedError } from '../cdp/errors.js'
 import { CDPOptions } from '../cdp/options.js'
 import { Capabilities } from '../capabilities.js'
@@ -25,6 +26,7 @@ interface CDPSessionState {
   cdpSessionId: string
   browserVersion: string
   timeouts: TimeoutsDef
+  elementRefs: ElementRefStore
 }
 
 const DEFAULT_TIMEOUTS: TimeoutsDef = {
@@ -72,7 +74,8 @@ export class CDPDriver implements ProtocolDriver {
         targetId: target.targetId,
         cdpSessionId: attach.sessionId,
         browserVersion: versionInfo.Browser ?? 'unknown',
-        timeouts: { ...DEFAULT_TIMEOUTS }
+        timeouts: { ...DEFAULT_TIMEOUTS },
+        elementRefs: new ElementRefStore()
       })
       return buildSessionDef(externalId, browser, versionInfo.Browser, launched.userDataDir)
     } catch (err) {
@@ -209,30 +212,136 @@ export class CDPDriver implements ProtocolDriver {
     throw notImpl('frameToParent')
   }
 
-  async findElement(_s: string, _u: string, _v: string): Promise<ElementRef | null> {
-    throw notImpl('findElement')
-  }
-  async findElements(_s: string, _u: string, _v: string): Promise<ElementRef[]> {
-    throw notImpl('findElements')
-  }
-  async elementFindElement(
-    _s: string,
-    _e: ElementRef,
-    _u: string,
-    _v: string
+  async findElement(
+    sessionId: string,
+    using: string,
+    value: string
   ): Promise<ElementRef | null> {
-    throw notImpl('elementFindElement')
+    const session = this._requireSession(sessionId)
+    const remote = await this._locate(session, null, using, value, false)
+    return this._registerRemoteObject(session, remote)
   }
-  async elementFindElements(
-    _s: string,
-    _e: ElementRef,
-    _u: string,
-    _v: string
+
+  async findElements(
+    sessionId: string,
+    using: string,
+    value: string
   ): Promise<ElementRef[]> {
-    throw notImpl('elementFindElements')
+    const session = this._requireSession(sessionId)
+    const remote = await this._locate(session, null, using, value, true)
+    return this._unwrapArray(session, remote)
   }
-  async getActiveElement(_s: string): Promise<ElementRef> {
-    throw notImpl('getActiveElement')
+
+  async elementFindElement(
+    sessionId: string,
+    elementId: ElementRef,
+    using: string,
+    value: string
+  ): Promise<ElementRef | null> {
+    const session = this._requireSession(sessionId)
+    const scope = session.elementRefs.resolve(elementId)
+    if (!scope) throw new Error(`Unknown element: ${elementId}`)
+    const remote = await this._locate(session, scope.objectId, using, value, false)
+    return this._registerRemoteObject(session, remote)
+  }
+
+  async elementFindElements(
+    sessionId: string,
+    elementId: ElementRef,
+    using: string,
+    value: string
+  ): Promise<ElementRef[]> {
+    const session = this._requireSession(sessionId)
+    const scope = session.elementRefs.resolve(elementId)
+    if (!scope) throw new Error(`Unknown element: ${elementId}`)
+    const remote = await this._locate(session, scope.objectId, using, value, true)
+    return this._unwrapArray(session, remote)
+  }
+
+  async getActiveElement(sessionId: string): Promise<ElementRef> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{
+      result: RemoteObject
+    }>(
+      'Runtime.evaluate',
+      { expression: 'document.activeElement', returnByValue: false },
+      session.cdpSessionId
+    )
+    const uuid = this._registerRemoteObject(session, res.result)
+    if (!uuid) throw new Error('No active element on the page')
+    return uuid
+  }
+
+  private async _locate(
+    session: CDPSessionState,
+    scopeObjectId: string | null,
+    using: string,
+    value: string,
+    multiple: boolean
+  ): Promise<RemoteObject> {
+    if (scopeObjectId) {
+      const res = await session.client.send<{ result: RemoteObject }>(
+        'Runtime.callFunctionOn',
+        {
+          functionDeclaration: `function(value, using, multiple) { return (${LOCATOR_FN})(value, this, using, multiple) }`,
+          objectId: scopeObjectId,
+          arguments: [
+            { value: value },
+            { value: using },
+            { value: multiple }
+          ],
+          returnByValue: false
+        },
+        session.cdpSessionId
+      )
+      return res.result
+    }
+    const res = await session.client.send<{ result: RemoteObject }>(
+      'Runtime.evaluate',
+      {
+        expression: `(${LOCATOR_FN})(${JSON.stringify(value)}, document, ${JSON.stringify(using)}, ${multiple})`,
+        returnByValue: false
+      },
+      session.cdpSessionId
+    )
+    return res.result
+  }
+
+  private _registerRemoteObject(
+    session: CDPSessionState,
+    remote: RemoteObject
+  ): ElementRef | null {
+    if (!remote || remote.subtype === 'null' || remote.type !== 'object') return null
+    if (!remote.objectId) return null
+    return session.elementRefs.register({ objectId: remote.objectId })
+  }
+
+  private async _unwrapArray(
+    session: CDPSessionState,
+    remote: RemoteObject
+  ): Promise<ElementRef[]> {
+    if (!remote?.objectId) return []
+    const props = await session.client.send<{
+      result: Array<{ name: string; value?: RemoteObject }>
+    }>(
+      'Runtime.getProperties',
+      { objectId: remote.objectId, ownProperties: true },
+      session.cdpSessionId
+    )
+    const out: ElementRef[] = []
+    for (const p of props.result) {
+      if (/^\d+$/.test(p.name) && p.value?.objectId) {
+        out.push(session.elementRefs.register({ objectId: p.value.objectId }))
+      }
+    }
+    await session.client
+      .send(
+        'Runtime.releaseObject',
+        { objectId: remote.objectId },
+        session.cdpSessionId
+      )
+      .catch(() => undefined)
+    return out
   }
 
   async elementClick(_s: string, _e: ElementRef): Promise<void> {
@@ -380,6 +489,50 @@ export class CDPDriver implements ProtocolDriver {
     return s
   }
 }
+
+interface RemoteObject {
+  type: string
+  subtype?: string
+  objectId?: string
+  value?: any
+  description?: string
+}
+
+/**
+ * Shared locator function that runs in the page. Takes the W3C "using"
+ * strategy name + value + multiple flag, and returns either a single
+ * Element (or null) or an array of Elements. Bound to `scope` parameter.
+ */
+const LOCATOR_FN = `function(value, scope, using, multiple) {
+  scope = scope || document;
+  switch (using) {
+    case 'css selector':
+    case 'tag name':
+      return multiple
+        ? Array.from(scope.querySelectorAll(value))
+        : scope.querySelector(value);
+    case 'xpath': {
+      if (multiple) {
+        var it = document.evaluate(value, scope, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        var out = [];
+        for (var i = 0; i < it.snapshotLength; i++) out.push(it.snapshotItem(i));
+        return out;
+      }
+      return document.evaluate(value, scope, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    }
+    case 'link text': {
+      var links = Array.from(scope.querySelectorAll('a'));
+      var matches = links.filter(function(a) { return (a.textContent || '').trim() === value; });
+      return multiple ? matches : (matches[0] || null);
+    }
+    case 'partial link text': {
+      var links2 = Array.from(scope.querySelectorAll('a'));
+      var matches2 = links2.filter(function(a) { return (a.textContent || '').indexOf(value) >= 0; });
+      return multiple ? matches2 : (matches2[0] || null);
+    }
+  }
+  return multiple ? [] : null;
+}`
 
 function notImpl(method: string): CDPNotImplementedError {
   return new CDPNotImplementedError(

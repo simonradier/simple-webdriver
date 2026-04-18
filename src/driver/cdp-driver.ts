@@ -783,14 +783,54 @@ export class CDPDriver implements ProtocolDriver {
     session.timeouts = { ...session.timeouts, ...timeouts }
   }
 
-  async screenshot(_s: string): Promise<string> {
-    throw notImpl('screenshot')
+  async screenshot(sessionId: string): Promise<string> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{ data: string }>(
+      'Page.captureScreenshot',
+      { captureBeyondViewport: false },
+      session.cdpSessionId
+    )
+    return res.data
   }
-  async getPageSource(_s: string): Promise<string> {
-    throw notImpl('getPageSource')
+
+  async getPageSource(sessionId: string): Promise<string> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{
+      result: { value?: string }
+    }>(
+      'Runtime.evaluate',
+      {
+        expression: 'document.documentElement.outerHTML',
+        returnByValue: true
+      },
+      session.cdpSessionId
+    )
+    return typeof res.result.value === 'string' ? res.result.value : ''
   }
-  async pagePrint(_s: string, _o?: PrintOptions): Promise<string> {
-    throw notImpl('pagePrint')
+
+  async pagePrint(
+    sessionId: string,
+    options: PrintOptions = {}
+  ): Promise<string> {
+    const session = this._requireSession(sessionId)
+    const params: Record<string, unknown> = {}
+    if (options.orientation) params.landscape = options.orientation === 'landscape'
+    if (options.scale !== undefined) params.scale = options.scale
+    if (options.background !== undefined) params.printBackground = options.background
+    if (options.page?.width !== undefined) params.paperWidth = options.page.width
+    if (options.page?.height !== undefined) params.paperHeight = options.page.height
+    if (options.margin?.top !== undefined) params.marginTop = options.margin.top
+    if (options.margin?.bottom !== undefined) params.marginBottom = options.margin.bottom
+    if (options.margin?.left !== undefined) params.marginLeft = options.margin.left
+    if (options.margin?.right !== undefined) params.marginRight = options.margin.right
+    if (options.shrinkToFit !== undefined) params.preferCSSPageSize = !options.shrinkToFit
+    if (options.pageRanges) params.pageRanges = options.pageRanges.join(',')
+    const res = await session.client.send<{ data: string }>(
+      'Page.printToPDF',
+      params,
+      session.cdpSessionId
+    )
+    return res.data
   }
 
   async actionsPerform(_s: string, _a: ActionSequence[]): Promise<void> {

@@ -67,7 +67,7 @@ describe('CDPDriver (F6 — session lifecycle)', function () {
     const driver = new CDPDriver()
     let caught: unknown
     try {
-      await driver.cookieGet('x', 'y')
+      await driver.actionsPerform('x', [])
     } catch (e) {
       caught = e
     }

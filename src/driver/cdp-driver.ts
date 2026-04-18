@@ -710,20 +710,52 @@ export class CDPDriver implements ProtocolDriver {
     return res.result?.value
   }
 
-  async cookieGetAll(_s: string): Promise<CookieDef[]> {
-    throw notImpl('cookieGetAll')
+  async cookieGetAll(sessionId: string): Promise<CookieDef[]> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{ cookies: any[] }>(
+      'Network.getCookies',
+      {},
+      session.cdpSessionId
+    )
+    return res.cookies.map(fromCdpCookie)
   }
-  async cookieGet(_s: string, _n: string): Promise<CookieDef> {
-    throw notImpl('cookieGet')
+
+  async cookieGet(sessionId: string, name: string): Promise<CookieDef> {
+    const all = await this.cookieGetAll(sessionId)
+    const found = all.find(c => c.name === name)
+    if (!found) throw new Error(`No cookie with name "${name}"`)
+    return found
   }
-  async cookieCreate(_s: string, _c: CookieDef): Promise<void> {
-    throw notImpl('cookieCreate')
+
+  async cookieCreate(sessionId: string, cookie: CookieDef): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const currentUrl = await this.getCurrentUrl(sessionId).catch(() => 'about:blank')
+    await session.client.send(
+      'Network.setCookie',
+      toCdpCookie(cookie, currentUrl),
+      session.cdpSessionId
+    )
   }
-  async cookieDelete(_s: string, _n: string): Promise<void> {
-    throw notImpl('cookieDelete')
+
+  async cookieDelete(sessionId: string, name: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const currentUrl = await this.getCurrentUrl(sessionId).catch(() => undefined)
+    const params: Record<string, any> = { name }
+    if (currentUrl) params.url = currentUrl
+    await session.client.send(
+      'Network.deleteCookies',
+      params,
+      session.cdpSessionId
+    )
   }
-  async cookieDeleteAll(_s: string): Promise<void> {
-    throw notImpl('cookieDeleteAll')
+
+  async cookieDeleteAll(sessionId: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    await session.client.send(
+      'Network.clearBrowserCookies',
+      {},
+      session.cdpSessionId
+    )
   }
 
   async alertAccept(_s: string): Promise<void> {
@@ -854,6 +886,35 @@ async function fetchBrowserVersion(
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching /json/version`)
   return (await res.json()) as { Browser?: string; [k: string]: any }
+}
+
+function fromCdpCookie(c: any): CookieDef {
+  const out: CookieDef = {
+    name: c.name ?? '',
+    value: c.value ?? ''
+  }
+  if (c.path !== undefined) out.path = c.path
+  if (c.domain !== undefined) out.domain = c.domain
+  if (c.secure !== undefined) out.secure = c.secure
+  if (c.httpOnly !== undefined) out.httpOnly = c.httpOnly
+  if (typeof c.expires === 'number' && c.expires >= 0) out.expiry = c.expires
+  if (c.sameSite) out.sameSite = c.sameSite
+  return out
+}
+
+function toCdpCookie(c: CookieDef, currentUrl: string): Record<string, unknown> {
+  const params: Record<string, unknown> = {
+    name: c.name,
+    value: c.value,
+    url: currentUrl
+  }
+  if (c.path !== undefined) params.path = c.path
+  if (c.domain !== undefined) params.domain = c.domain
+  if (c.secure !== undefined) params.secure = c.secure
+  if (c.httpOnly !== undefined) params.httpOnly = c.httpOnly
+  if (c.expiry !== undefined) params.expires = c.expiry
+  if (c.sameSite) params.sameSite = c.sameSite
+  return params
 }
 
 function buildSessionDef(

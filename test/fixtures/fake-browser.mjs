@@ -58,16 +58,52 @@ wss.on('connection', ws => {
     send(evt)
   }
 
-  const deriveEvaluate = (expression, session) => {
-    // Map a handful of common read scripts to the tracked state.
-    if (/window\.location\.href/.test(expression))
-      return { type: 'string', value: session?.url ?? 'about:blank' }
-    if (/document\.title/.test(expression))
-      return { type: 'string', value: session?.title ?? '' }
-    return { type: 'undefined' }
+  const toRemoteObject = value => {
+    if (value === null) return { type: 'object', subtype: 'null', value: null }
+    const t = typeof value
+    if (t === 'undefined') return { type: 'undefined' }
+    if (t === 'string' || t === 'number' || t === 'boolean')
+      return { type: t, value }
+    return { type: 'object', value }
   }
 
-  const handleCommand = msg => {
+  const runScript = async (expression, session) => {
+    // Build a fake browsing environment tied to session state.
+    const elements = session?.elements ?? new Map()
+    const fakeWindow = {
+      location: {
+        get href() {
+          return session?.url ?? 'about:blank'
+        }
+      }
+    }
+    const fakeDocument = {
+      get title() {
+        return session?.title ?? ''
+      }
+    }
+    try {
+      // eslint-disable-next-line no-new-func
+      const fn = new Function(
+        'window',
+        'document',
+        '__ELEMENTS__',
+        `"use strict"; return (${expression});`
+      )
+      const value = await Promise.resolve(fn(fakeWindow, fakeDocument, elements))
+      return { result: toRemoteObject(value) }
+    } catch (e) {
+      return {
+        result: { type: 'undefined' },
+        exceptionDetails: {
+          text: e.message,
+          exception: { description: e.message }
+        }
+      }
+    }
+  }
+
+  const handleCommand = async msg => {
     const { id, method, params = {}, sessionId } = msg
     const session = sessionId ? sessions.get(sessionId) : null
     let result = {}
@@ -146,7 +182,7 @@ wss.on('connection', ws => {
         )
         break
       case 'Runtime.evaluate':
-        result = { result: deriveEvaluate(params.expression ?? '', session) }
+        result = await runScript(params.expression ?? 'undefined', session)
         break
       default:
         result = { echoed: method, params }
@@ -156,14 +192,23 @@ wss.on('connection', ws => {
     send(reply)
   }
 
-  ws.on('message', raw => {
+  ws.on('message', async raw => {
     let msg
     try {
       msg = JSON.parse(String(raw))
     } catch {
       return
     }
-    handleCommand(msg)
+    try {
+      await handleCommand(msg)
+    } catch (e) {
+      const reply = {
+        id: msg?.id,
+        error: { code: -32000, message: e?.message ?? String(e) }
+      }
+      if (msg?.sessionId) reply.sessionId = msg.sessionId
+      send(reply)
+    }
   })
 })
 

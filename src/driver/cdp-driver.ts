@@ -277,11 +277,38 @@ export class CDPDriver implements ProtocolDriver {
     throw notImpl('elementScreenshot')
   }
 
-  async executeSync(_s: string, _script: string, _args: any[]): Promise<any> {
-    throw notImpl('executeSync')
+  async executeSync(sessionId: string, script: string, args: any[]): Promise<any> {
+    return this._runScript(sessionId, script, args, false)
   }
-  async executeAsync(_s: string, _script: string, _args: any[]): Promise<any> {
-    throw notImpl('executeAsync')
+  async executeAsync(sessionId: string, script: string, args: any[]): Promise<any> {
+    return this._runScript(sessionId, script, args, true)
+  }
+
+  private async _runScript(
+    sessionId: string,
+    script: string,
+    args: any[],
+    awaitPromise: boolean
+  ): Promise<any> {
+    const session = this._requireSession(sessionId)
+    // Element refs are not yet resolved — that plumbing lands with F9.
+    // For now any arg that looks like a W3C element wrapper is passed as
+    // a plain object, which will not be a live DOM node in the page.
+    const expression = `(function() {${script}}).apply(null, ${JSON.stringify(args)})`
+    const res = await session.client.send<{
+      result: { value?: any }
+      exceptionDetails?: { text: string; exception?: { description?: string } }
+    }>(
+      'Runtime.evaluate',
+      { expression, returnByValue: true, awaitPromise },
+      session.cdpSessionId
+    )
+    if (res.exceptionDetails) {
+      const msg =
+        res.exceptionDetails.exception?.description ?? res.exceptionDetails.text
+      throw new Error(`Script error: ${msg}`)
+    }
+    return res.result?.value
   }
 
   async cookieGetAll(_s: string): Promise<CookieDef[]> {

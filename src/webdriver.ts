@@ -12,6 +12,8 @@ import { BrowserType } from './browser.js'
 import { WindowType } from './window.js'
 import { ProtocolDriver, ElementRef } from './driver/protocol-driver.js'
 import { W3CDriver } from './driver/w3c-driver.js'
+import { CDPOptions } from './cdp/options.js'
+import { CDPNotImplementedError } from './cdp/errors.js'
 
 export enum Using {
   id = 'id',
@@ -104,7 +106,8 @@ export class WebDriver {
 
   /**
    * Create a SimpleWebDriver object which allows to interact with a webdriver server.
-   * @deprecated Use {@link WebDriver.w3c} instead. Will be removed in a future major version.
+   * @deprecated Use {@link WebDriver.w3c} or {@link WebDriver.cdp} instead.
+   * Will be removed in a future major version.
    * @param serverURL The URL of the webdriver server
    * @param protocol The type of protocol (see Protocol enum)
    */
@@ -119,6 +122,33 @@ export class WebDriver {
       )
     }
     this._driver = new W3CDriver(this._serverURL)
+  }
+
+  /**
+   * Create a WebDriver that talks to a W3C WebDriver HTTP server
+   * (chromedriver, geckodriver, msedgedriver, safaridriver...).
+   *
+   * @param serverURL Absolute http(s) URL of the WebDriver server.
+   */
+  public static w3c(serverURL: string): WebDriver {
+    return new WebDriver(serverURL, Protocol.W3C)
+  }
+
+  /**
+   * Create a WebDriver that speaks Chrome DevTools Protocol directly with
+   * a Chromium-based browser. The library launches and manages the browser
+   * process itself (no external driver binary required).
+   *
+   * Not yet implemented — throws {@link CDPNotImplementedError}. The options
+   * shape is stable and safe to pass today.
+   *
+   * @param options Browser launch configuration.
+   */
+  public static cdp(options: CDPOptions = {}): WebDriver {
+    // Reference options so the parameter is not flagged as unused and so
+    // the argument flows through a real code path once the CDP driver lands.
+    void options
+    throw new CDPNotImplementedError()
   }
 
   public async status() {

@@ -107,23 +107,68 @@ export class CDPDriver implements ProtocolDriver {
 
   // Everything below is NOT implemented yet — filled in by F7…F17.
 
-  async navigateTo(_s: string, _url: string): Promise<void> {
-    throw notImpl('navigateTo')
+  async navigateTo(sessionId: string, url: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const loaded = waitForFrameStopped(session)
+    const res = await session.client.send<{
+      frameId: string
+      errorText?: string
+    }>('Page.navigate', { url }, session.cdpSessionId)
+    if (res.errorText) throw new Error(`Navigation failed: ${res.errorText}`)
+    await loaded
   }
-  async navigateBack(_s: string): Promise<void> {
-    throw notImpl('navigateBack')
+
+  async navigateBack(sessionId: string): Promise<void> {
+    await this._navigateHistory(sessionId, -1)
   }
-  async navigateForward(_s: string): Promise<void> {
-    throw notImpl('navigateForward')
+
+  async navigateForward(sessionId: string): Promise<void> {
+    await this._navigateHistory(sessionId, 1)
   }
-  async navigateRefresh(_s: string): Promise<void> {
-    throw notImpl('navigateRefresh')
+
+  async navigateRefresh(sessionId: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const loaded = waitForFrameStopped(session)
+    await session.client.send('Page.reload', {}, session.cdpSessionId)
+    await loaded
   }
-  async getCurrentUrl(_s: string): Promise<string> {
-    throw notImpl('getCurrentUrl')
+
+  async getCurrentUrl(sessionId: string): Promise<string> {
+    return this._evalString(sessionId, 'window.location.href')
   }
-  async getTitle(_s: string): Promise<string> {
-    throw notImpl('getTitle')
+
+  async getTitle(sessionId: string): Promise<string> {
+    return this._evalString(sessionId, 'document.title')
+  }
+
+  private async _navigateHistory(sessionId: string, direction: -1 | 1): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const history = await session.client.send<{
+      currentIndex: number
+      entries: { id: number }[]
+    }>('Page.getNavigationHistory', {}, session.cdpSessionId)
+    const target = history.currentIndex + direction
+    if (target < 0 || target >= history.entries.length) return
+    const entryId = history.entries[target].id
+    const loaded = waitForFrameStopped(session)
+    await session.client.send(
+      'Page.navigateToHistoryEntry',
+      { entryId },
+      session.cdpSessionId
+    )
+    await loaded
+  }
+
+  private async _evalString(sessionId: string, expression: string): Promise<string> {
+    const session = this._requireSession(sessionId)
+    const res = await session.client.send<{
+      result: { type: string; value?: any }
+    }>(
+      'Runtime.evaluate',
+      { expression, returnByValue: true },
+      session.cdpSessionId
+    )
+    return typeof res.result.value === 'string' ? res.result.value : ''
   }
 
   async windowGetHandle(_s: string): Promise<string> {
@@ -313,6 +358,22 @@ function notImpl(method: string): CDPNotImplementedError {
   return new CDPNotImplementedError(
     `CDPDriver.${method} is not yet implemented — landing incrementally in F7-F17`
   )
+}
+
+function waitForFrameStopped(session: CDPSessionState): Promise<void> {
+  return new Promise<void>(resolve => {
+    const off = session.client.on('Page.frameStoppedLoading', evt => {
+      if (evt.sessionId === session.cdpSessionId) {
+        off()
+        clearTimeout(timer)
+        resolve()
+      }
+    })
+    const timer = setTimeout(() => {
+      off()
+      resolve()
+    }, session.timeouts.pageLoad)
+  })
 }
 
 async function fetchBrowserVersion(

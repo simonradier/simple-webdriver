@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 // Minimal fake Chromium debugger used by the launcher + CDP driver tests.
 //
-// Responds to:
-//   GET  /json/version    — returns Browser/Protocol-Version/webSocketDebuggerUrl
-//   WS   /devtools/...    — echoes a minimal subset of CDP commands used by
-//                           CDPDriver.startSession / stopSession
+// Responds to GET /json/version and a CDP WebSocket endpoint at
+// /devtools/browser/fake-id. Implements just enough of the protocol to
+// satisfy the features landed in CDPDriver so far (lifecycle, navigation,
+// runtime evaluate, ...).
 //
-// Stays alive until SIGTERM.
+// The fake tracks per-CDP-session state: currentUrl, title, frameId.
+// Navigation emits Page.frameStoppedLoading with that sessionId so the
+// driver-level "wait for load" logic is exercised.
+//
+// Extend handleCommand / deriveEvaluate as new features land.
 import { createServer } from 'http'
 import { WebSocketServer } from 'ws'
 
@@ -41,25 +45,47 @@ const http = createServer((req, res) => {
 const wss = new WebSocketServer({ server: http, path: wsPath })
 
 wss.on('connection', ws => {
+  // Per-connection state.
+  const sessions = new Map() // cdpSessionId -> { targetId, url, title, frameId }
   let nextTargetId = 1
   let nextSessionId = 1
-  ws.on('message', raw => {
-    let msg
-    try {
-      msg = JSON.parse(String(raw))
-    } catch {
-      return
-    }
-    const id = msg.id
-    const method = msg.method
+
+  const send = obj => ws.send(JSON.stringify(obj))
+
+  const emitEvent = (method, params, sessionId) => {
+    const evt = { method, params }
+    if (sessionId) evt.sessionId = sessionId
+    send(evt)
+  }
+
+  const deriveEvaluate = (expression, session) => {
+    // Map a handful of common read scripts to the tracked state.
+    if (/window\.location\.href/.test(expression))
+      return { type: 'string', value: session?.url ?? 'about:blank' }
+    if (/document\.title/.test(expression))
+      return { type: 'string', value: session?.title ?? '' }
+    return { type: 'undefined' }
+  }
+
+  const handleCommand = msg => {
+    const { id, method, params = {}, sessionId } = msg
+    const session = sessionId ? sessions.get(sessionId) : null
     let result = {}
     switch (method) {
       case 'Target.createTarget':
         result = { targetId: `target-${nextTargetId++}` }
         break
-      case 'Target.attachToTarget':
-        result = { sessionId: `session-${nextSessionId++}` }
+      case 'Target.attachToTarget': {
+        const newSid = `session-${nextSessionId++}`
+        sessions.set(newSid, {
+          targetId: params.targetId,
+          url: 'about:blank',
+          title: '',
+          frameId: `frame-${newSid}`
+        })
+        result = { sessionId: newSid }
         break
+      }
       case 'Target.closeTarget':
         result = { success: true }
         break
@@ -69,13 +95,75 @@ wss.on('connection', ws => {
       case 'Network.enable':
         result = {}
         break
+      case 'Page.navigate': {
+        if (session) {
+          session.url = params.url ?? session.url
+          session.title = (params.url?.match(/title=([^&]+)/) ?? [])[1] ?? session.title
+        }
+        result = { frameId: session?.frameId ?? 'frame-x' }
+        // Emit frameStoppedLoading shortly after.
+        setImmediate(() =>
+          emitEvent(
+            'Page.frameStoppedLoading',
+            { frameId: session?.frameId ?? 'frame-x' },
+            sessionId
+          )
+        )
+        break
+      }
+      case 'Page.reload':
+        result = {}
+        setImmediate(() =>
+          emitEvent(
+            'Page.frameStoppedLoading',
+            { frameId: session?.frameId ?? 'frame-x' },
+            sessionId
+          )
+        )
+        break
+      case 'Page.getNavigationHistory':
+        result = {
+          currentIndex: 0,
+          entries: [
+            {
+              id: 1,
+              url: session?.url ?? 'about:blank',
+              userTypedURL: session?.url ?? 'about:blank',
+              title: session?.title ?? '',
+              transitionType: 'typed'
+            }
+          ]
+        }
+        break
+      case 'Page.navigateToHistoryEntry':
+        result = {}
+        setImmediate(() =>
+          emitEvent(
+            'Page.frameStoppedLoading',
+            { frameId: session?.frameId ?? 'frame-x' },
+            sessionId
+          )
+        )
+        break
+      case 'Runtime.evaluate':
+        result = { result: deriveEvaluate(params.expression ?? '', session) }
+        break
       default:
-        // echo
-        result = { echoed: method, params: msg.params }
+        result = { echoed: method, params }
     }
     const reply = { id, result }
-    if (msg.sessionId) reply.sessionId = msg.sessionId
-    ws.send(JSON.stringify(reply))
+    if (sessionId) reply.sessionId = sessionId
+    send(reply)
+  }
+
+  ws.on('message', raw => {
+    let msg
+    try {
+      msg = JSON.parse(String(raw))
+    } catch {
+      return
+    }
+    handleCommand(msg)
   })
 })
 

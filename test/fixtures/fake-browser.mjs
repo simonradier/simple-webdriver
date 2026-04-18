@@ -50,6 +50,16 @@ const http = createServer((req, res) => {
 
 const wss = new WebSocketServer({ server: http, path: wsPath })
 
+class FakeEvent {
+  constructor(type, init = {}) {
+    this.type = type
+    this.bubbles = !!init.bubbles
+    this.cancelable = !!init.cancelable
+    this.clientX = init.clientX ?? 0
+    this.clientY = init.clientY ?? 0
+  }
+}
+
 class FakeElement {
   constructor(tag, attrs = {}, children = [], text = '') {
     this.tagName = tag.toUpperCase()
@@ -113,6 +123,14 @@ class FakeElement {
     this._focused = false
   }
   scrollIntoView() {}
+  dispatchEvent(evt) {
+    this._events = this._events ?? []
+    this._events.push(evt)
+    return true
+  }
+  get isContentEditable() {
+    return !!this.attributes.contenteditable
+  }
   getBoundingClientRect() {
     return { x: 0, y: 0, width: 100, height: 20, top: 0, left: 0 }
   }
@@ -244,10 +262,18 @@ wss.on('connection', ws => {
         'window',
         'document',
         'XPathResult',
+        'Event',
+        'MouseEvent',
         `"use strict"; return (${expression});`
       )
       const value = await Promise.resolve(
-        fn(fakeWindow, fakeDocument, { FIRST_ORDERED_NODE_TYPE: 9, ORDERED_NODE_SNAPSHOT_TYPE: 7 })
+        fn(
+          fakeWindow,
+          fakeDocument,
+          { FIRST_ORDERED_NODE_TYPE: 9, ORDERED_NODE_SNAPSHOT_TYPE: 7 },
+          FakeEvent,
+          FakeEvent
+        )
       )
       return { result: toRemoteObject(value, session, byValue) }
     } catch (e) {
@@ -274,9 +300,13 @@ wss.on('connection', ws => {
       const wrapper = new Function(
         'self',
         'args',
+        'Event',
+        'MouseEvent',
         `"use strict"; return (${functionDeclaration}).apply(self, args);`
       )
-      const value = await Promise.resolve(wrapper(target.value, resolvedArgs))
+      const value = await Promise.resolve(
+        wrapper(target.value, resolvedArgs, FakeEvent, FakeEvent)
+      )
       return { result: toRemoteObject(value, session, byValue) }
     } catch (e) {
       return {

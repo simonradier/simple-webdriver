@@ -344,14 +344,81 @@ export class CDPDriver implements ProtocolDriver {
     return out
   }
 
-  async elementClick(_s: string, _e: ElementRef): Promise<void> {
-    throw notImpl('elementClick')
+  async elementClick(sessionId: string, elementId: ElementRef): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const scope = this._resolveElement(session, elementId)
+    await session.client.send(
+      'Runtime.callFunctionOn',
+      {
+        functionDeclaration: `function() {
+          if (typeof this.scrollIntoView === 'function') this.scrollIntoView();
+          if (typeof this.click === 'function') { this.click(); return; }
+          const r = this.getBoundingClientRect ? this.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 };
+          const x = r.left + r.width / 2, y = r.top + r.height / 2;
+          const evt = new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y });
+          this.dispatchEvent(evt);
+        }`,
+        objectId: scope.objectId,
+        returnByValue: true
+      },
+      session.cdpSessionId
+    )
   }
-  async elementClear(_s: string, _e: ElementRef): Promise<void> {
-    throw notImpl('elementClear')
+
+  async elementClear(sessionId: string, elementId: ElementRef): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const scope = this._resolveElement(session, elementId)
+    await session.client.send(
+      'Runtime.callFunctionOn',
+      {
+        functionDeclaration: `function() {
+          if (typeof this.focus === 'function') this.focus();
+          if ('value' in this) this.value = '';
+          if (this.isContentEditable) this.textContent = '';
+          this.dispatchEvent && this.dispatchEvent(new Event('input', { bubbles: true }));
+          this.dispatchEvent && this.dispatchEvent(new Event('change', { bubbles: true }));
+        }`,
+        objectId: scope.objectId,
+        returnByValue: true
+      },
+      session.cdpSessionId
+    )
   }
-  async elementSendKeys(_s: string, _e: ElementRef, _k: string): Promise<void> {
-    throw notImpl('elementSendKeys')
+
+  async elementSendKeys(
+    sessionId: string,
+    elementId: ElementRef,
+    keys: string
+  ): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const scope = this._resolveElement(session, elementId)
+    await session.client.send(
+      'Runtime.callFunctionOn',
+      {
+        functionDeclaration: `function(keys) {
+          if (typeof this.focus === 'function') this.focus();
+          if ('value' in this) {
+            this.value = (this.value || '') + keys;
+          } else if (this.isContentEditable) {
+            this.textContent = (this.textContent || '') + keys;
+          } else {
+            return;
+          }
+          this.dispatchEvent && this.dispatchEvent(new Event('input', { bubbles: true }));
+          this.dispatchEvent && this.dispatchEvent(new Event('change', { bubbles: true }));
+        }`,
+        objectId: scope.objectId,
+        arguments: [{ value: keys }],
+        returnByValue: true
+      },
+      session.cdpSessionId
+    )
+  }
+
+  private _resolveElement(session: CDPSessionState, elementId: ElementRef) {
+    const scope = session.elementRefs.resolve(elementId)
+    if (!scope) throw new Error(`Unknown element: ${elementId}`)
+    return scope
   }
 
   async elementGetAttribute(

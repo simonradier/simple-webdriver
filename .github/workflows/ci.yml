@@ -76,15 +76,15 @@ jobs:
 
       - name: Run chromedriver (ubuntu)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'ubuntu-latest' }}
-        run: xvfb-run --auto-servernum chromedriver &
+        run: xvfb-run --auto-servernum chromedriver --port=9515 &
 
       - name: Run chromedriver (windows)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'windows-latest' }}
-        run: cmd /c "START chromedriver"
+        run: cmd /c "START chromedriver --port=9515"
 
       - name: Run chromedriver (macos)
         if: ${{ matrix.browser == 'chrome' && matrix.os == 'macos-latest' }}
-        run: chromedriver &
+        run: chromedriver --port=9515 &
 
       - name: Run geckodriver (ubuntu)
         if: ${{ matrix.browser == 'firefox' && matrix.os == 'ubuntu-latest' }}

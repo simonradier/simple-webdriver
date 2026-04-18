@@ -5,7 +5,7 @@ import { ElementRefStore } from '../cdp/element-ref-store.js'
 import { CDPNotImplementedError } from '../cdp/errors.js'
 import { CDPOptions } from '../cdp/options.js'
 import { Capabilities } from '../capabilities.js'
-import { ActionSequence } from '../interface/actions.js'
+import { ActionItem, ActionSequence } from '../interface/actions.js'
 import { CookieDef } from '../interface/cookie.js'
 import { PrintOptions } from '../interface/print.js'
 import { SessionDef } from '../interface/session.js'
@@ -879,11 +879,121 @@ export class CDPDriver implements ProtocolDriver {
     return res.data
   }
 
-  async actionsPerform(_s: string, _a: ActionSequence[]): Promise<void> {
-    throw notImpl('actionsPerform')
+  async actionsPerform(
+    sessionId: string,
+    actions: ActionSequence[]
+  ): Promise<void> {
+    const session = this._requireSession(sessionId)
+    const pointer = { x: 0, y: 0 }
+    for (const seq of actions) {
+      for (const action of seq.actions) {
+        await this._performActionItem(session, seq, action, pointer)
+      }
+    }
   }
-  async actionsRelease(_s: string): Promise<void> {
-    throw notImpl('actionsRelease')
+
+  async actionsRelease(sessionId: string): Promise<void> {
+    // Minimal: CDP doesn't expose a one-shot release for all sources.
+    // Higher-fidelity release tracking can live alongside a stateful
+    // action replay engine; for now we no-op so callers that optimistically
+    // release after performActions don't blow up.
+    this._requireSession(sessionId)
+  }
+
+  private async _performActionItem(
+    session: CDPSessionState,
+    seq: ActionSequence,
+    action: ActionItem,
+    pointer: { x: number; y: number }
+  ): Promise<void> {
+    if (action.type === 'pause') {
+      if (action.duration && action.duration > 0) {
+        await new Promise(r => setTimeout(r, action.duration))
+      }
+      return
+    }
+    switch (seq.type) {
+      case 'key': {
+        if (action.type === 'keyDown' || action.type === 'keyUp') {
+          await session.client.send(
+            'Input.dispatchKeyEvent',
+            {
+              type: action.type === 'keyDown' ? 'keyDown' : 'keyUp',
+              text:
+                action.type === 'keyDown' && action.value?.length === 1
+                  ? action.value
+                  : undefined,
+              key: action.value
+            },
+            session.cdpSessionId
+          )
+        }
+        return
+      }
+      case 'pointer': {
+        const pointerType = seq.parameters?.pointerType ?? 'mouse'
+        if (action.type === 'pointerMove') {
+          if (typeof action.x === 'number') pointer.x = action.x
+          if (typeof action.y === 'number') pointer.y = action.y
+          await session.client.send(
+            'Input.dispatchMouseEvent',
+            {
+              type: 'mouseMoved',
+              x: pointer.x,
+              y: pointer.y,
+              pointerType
+            },
+            session.cdpSessionId
+          )
+        } else if (action.type === 'pointerDown') {
+          await session.client.send(
+            'Input.dispatchMouseEvent',
+            {
+              type: 'mousePressed',
+              x: pointer.x,
+              y: pointer.y,
+              button: buttonName(action.button ?? 0),
+              clickCount: 1,
+              pointerType
+            },
+            session.cdpSessionId
+          )
+        } else if (action.type === 'pointerUp') {
+          await session.client.send(
+            'Input.dispatchMouseEvent',
+            {
+              type: 'mouseReleased',
+              x: pointer.x,
+              y: pointer.y,
+              button: buttonName(action.button ?? 0),
+              clickCount: 1,
+              pointerType
+            },
+            session.cdpSessionId
+          )
+        }
+        return
+      }
+      case 'wheel': {
+        if (action.type === 'scroll') {
+          await session.client.send(
+            'Input.dispatchMouseEvent',
+            {
+              type: 'mouseWheel',
+              x: action.x ?? pointer.x,
+              y: action.y ?? pointer.y,
+              deltaX: action.deltaX ?? 0,
+              deltaY: action.deltaY ?? 0
+            },
+            session.cdpSessionId
+          )
+        }
+        return
+      }
+      case 'none':
+      default:
+        return
+    }
   }
 
   /** @internal */
@@ -972,6 +1082,23 @@ async function fetchBrowserVersion(
   })
   if (!res.ok) throw new Error(`HTTP ${res.status} fetching /json/version`)
   return (await res.json()) as { Browser?: string; [k: string]: any }
+}
+
+function buttonName(n: number): string {
+  switch (n) {
+    case 0:
+      return 'left'
+    case 1:
+      return 'middle'
+    case 2:
+      return 'right'
+    case 3:
+      return 'back'
+    case 4:
+      return 'forward'
+    default:
+      return 'none'
+  }
 }
 
 function fromCdpCookie(c: any): CookieDef {

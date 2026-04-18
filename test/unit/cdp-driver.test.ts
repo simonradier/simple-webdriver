@@ -63,15 +63,22 @@ describe('CDPDriver (F6 — session lifecycle)', function () {
     }
   })
 
-  it('un-implemented operations throw CDPNotImplementedError', async function () {
-    const driver = new CDPDriver()
-    let caught: unknown
+  it('nested frameSwitch throws CDPNotImplementedError', async function () {
+    if (skipOnWindows) this.skip()
+    const driver = new CDPDriver({ executablePath: fakeBrowser })
+    const caps = new Capabilities('chrome' as any)
+    const session = await driver.startSession('chrome', caps)
     try {
-      await driver.actionsPerform('x', [])
-    } catch (e) {
-      caught = e
+      let caught: unknown
+      try {
+        await driver.frameSwitch(session.sessionId, 'some-frame')
+      } catch (e) {
+        caught = e
+      }
+      expect(caught).to.be.instanceOf(CDPNotImplementedError)
+    } finally {
+      await driver.stopSession(session.sessionId)
     }
-    expect(caught).to.be.instanceOf(CDPNotImplementedError)
   })
 
   it('WebDriver.cdp() + start() end-to-end with the fake browser', async function () {

@@ -360,6 +360,30 @@ wss.on('connection', ws => {
         }
         result = {}
         break
+      case 'Fake.triggerDialog':
+        // Test hook: simulate a javascriptDialogOpening event.
+        setImmediate(() =>
+          emitEvent(
+            'Page.javascriptDialogOpening',
+            {
+              url: session?.url ?? 'about:blank',
+              message: params.message ?? '',
+              type: params.type ?? 'alert',
+              defaultPrompt: params.defaultPrompt ?? '',
+              hasBrowserHandler: true
+            },
+            sessionId
+          )
+        )
+        if (session) {
+          session.alert = {
+            type: params.type ?? 'alert',
+            message: params.message ?? '',
+            defaultPrompt: params.defaultPrompt
+          }
+        }
+        result = {}
+        break
       case 'Target.createTarget':
         result = { targetId: `target-${nextTargetId++}` }
         break
@@ -437,7 +461,12 @@ wss.on('connection', ws => {
         result = { data: Buffer.from('fake-pdf').toString('base64') }
         break
       case 'Page.handleJavaScriptDialog':
-        if (session) session.alert = null
+        if (session) {
+          session.alert = null
+          setImmediate(() =>
+            emitEvent('Page.javascriptDialogClosed', { result: !!params.accept }, sessionId)
+          )
+        }
         result = {}
         break
       case 'Runtime.evaluate':

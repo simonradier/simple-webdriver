@@ -19,6 +19,12 @@ import {
   WindowCreateResult
 } from './protocol-driver.js'
 
+interface PendingDialog {
+  type: string
+  message: string
+  defaultPrompt?: string
+}
+
 interface CDPSessionState {
   launched: LaunchedBrowser
   client: CDPClient
@@ -27,6 +33,8 @@ interface CDPSessionState {
   browserVersion: string
   timeouts: TimeoutsDef
   elementRefs: ElementRefStore
+  pendingDialog: PendingDialog | null
+  pendingPromptText: string | null
 }
 
 const DEFAULT_TIMEOUTS: TimeoutsDef = {
@@ -68,14 +76,30 @@ export class CDPDriver implements ProtocolDriver {
 
       const versionInfo = await fetchBrowserVersion(launched.debugUrl)
       const externalId = randomUUID()
-      this._sessions.set(externalId, {
+      const state: CDPSessionState = {
         launched,
         client,
         targetId: target.targetId,
         cdpSessionId: attach.sessionId,
         browserVersion: versionInfo.Browser ?? 'unknown',
         timeouts: { ...DEFAULT_TIMEOUTS },
-        elementRefs: new ElementRefStore()
+        elementRefs: new ElementRefStore(),
+        pendingDialog: null,
+        pendingPromptText: null
+      }
+      this._sessions.set(externalId, state)
+      client.on('Page.javascriptDialogOpening', evt => {
+        if (evt.sessionId !== state.cdpSessionId) return
+        state.pendingDialog = {
+          type: evt.params?.type ?? 'alert',
+          message: evt.params?.message ?? '',
+          defaultPrompt: evt.params?.defaultPrompt
+        }
+      })
+      client.on('Page.javascriptDialogClosed', evt => {
+        if (evt.sessionId !== state.cdpSessionId) return
+        state.pendingDialog = null
+        state.pendingPromptText = null
       })
       return buildSessionDef(externalId, browser, versionInfo.Browser, launched.userDataDir)
     } catch (err) {
@@ -758,17 +782,39 @@ export class CDPDriver implements ProtocolDriver {
     )
   }
 
-  async alertAccept(_s: string): Promise<void> {
-    throw notImpl('alertAccept')
+  async alertAccept(sessionId: string): Promise<void> {
+    await this._handleDialog(sessionId, true)
   }
-  async alertDismiss(_s: string): Promise<void> {
-    throw notImpl('alertDismiss')
+
+  async alertDismiss(sessionId: string): Promise<void> {
+    await this._handleDialog(sessionId, false)
   }
-  async alertGetText(_s: string): Promise<string> {
-    throw notImpl('alertGetText')
+
+  async alertGetText(sessionId: string): Promise<string> {
+    const session = this._requireSession(sessionId)
+    if (!session.pendingDialog) throw new Error('No open JavaScript dialog')
+    return session.pendingDialog.message
   }
-  async alertSendText(_s: string, _t: string): Promise<void> {
-    throw notImpl('alertSendText')
+
+  async alertSendText(sessionId: string, text: string): Promise<void> {
+    const session = this._requireSession(sessionId)
+    session.pendingPromptText = text
+  }
+
+  private async _handleDialog(sessionId: string, accept: boolean): Promise<void> {
+    const session = this._requireSession(sessionId)
+    if (!session.pendingDialog) throw new Error('No open JavaScript dialog')
+    const params: Record<string, unknown> = { accept }
+    if (accept && session.pendingPromptText != null) {
+      params.promptText = session.pendingPromptText
+    }
+    await session.client.send(
+      'Page.handleJavaScriptDialog',
+      params,
+      session.cdpSessionId
+    )
+    session.pendingDialog = null
+    session.pendingPromptText = null
   }
 
   async timeoutsGet(sessionId: string): Promise<TimeoutsDef> {

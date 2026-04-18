@@ -68,9 +68,13 @@ class FakeElement {
     this._text = text
     this._value = attrs.value ?? ''
     this.__isFakeElement = true
-    this._style = {}
-    this._enabled = attrs.disabled === undefined
-    this._selected = !!attrs.checked || !!attrs.selected
+    this._style = attrs._style ?? {}
+    this.disabled = attrs.disabled !== undefined
+    this.checked = !!attrs.checked
+    this.selected = !!attrs.selected
+  }
+  get innerText() {
+    return this.textContent
   }
   get textContent() {
     if (this.children.length === 0) return this._text
@@ -203,7 +207,7 @@ wss.on('connection', ws => {
     return state
   }
 
-  const evalIn = async (expression, session, byValue) => {
+  const makeGlobals = session => {
     const rootElements = session?.elements ?? []
     const asCollection = {
       all() {
@@ -223,7 +227,13 @@ wss.on('connection', ws => {
         }
       },
       getComputedStyle(el) {
-        return el?._style ?? {}
+        const src = el?._style ?? {}
+        return {
+          ...src,
+          getPropertyValue(prop) {
+            return src[prop] ?? ''
+          }
+        }
       }
     }
     const fakeDocument = {
@@ -237,8 +247,6 @@ wss.on('connection', ws => {
         return asCollection.querySelectorAll(sel)
       },
       evaluate(xpath, scope) {
-        // Very small xpath shim: only handles simple cases like //tag or
-        // //*[@attr='value']. Returns first match as singleNodeValue.
         const all = (scope ?? asCollection).querySelectorAll('*')
         const match = simpleXpath(all, xpath)
         return {
@@ -256,6 +264,17 @@ wss.on('connection', ws => {
         }
       }
     }
+    return {
+      window: fakeWindow,
+      document: fakeDocument,
+      XPathResult: { FIRST_ORDERED_NODE_TYPE: 9, ORDERED_NODE_SNAPSHOT_TYPE: 7 },
+      Event: FakeEvent,
+      MouseEvent: FakeEvent
+    }
+  }
+
+  const evalIn = async (expression, session, byValue) => {
+    const g = makeGlobals(session)
     try {
       // eslint-disable-next-line no-new-func
       const fn = new Function(
@@ -267,13 +286,7 @@ wss.on('connection', ws => {
         `"use strict"; return (${expression});`
       )
       const value = await Promise.resolve(
-        fn(
-          fakeWindow,
-          fakeDocument,
-          { FIRST_ORDERED_NODE_TYPE: 9, ORDERED_NODE_SNAPSHOT_TYPE: 7 },
-          FakeEvent,
-          FakeEvent
-        )
+        fn(g.window, g.document, g.XPathResult, g.Event, g.MouseEvent)
       )
       return { result: toRemoteObject(value, session, byValue) }
     } catch (e) {
@@ -295,17 +308,29 @@ wss.on('connection', ws => {
       if (a.objectId) return objectTable.get(a.objectId)?.value
       return undefined
     })
+    const g = makeGlobals(session)
     try {
       // eslint-disable-next-line no-new-func
       const wrapper = new Function(
         'self',
         'args',
+        'window',
+        'document',
+        'XPathResult',
         'Event',
         'MouseEvent',
         `"use strict"; return (${functionDeclaration}).apply(self, args);`
       )
       const value = await Promise.resolve(
-        wrapper(target.value, resolvedArgs, FakeEvent, FakeEvent)
+        wrapper(
+          target.value,
+          resolvedArgs,
+          g.window,
+          g.document,
+          g.XPathResult,
+          g.Event,
+          g.MouseEvent
+        )
       )
       return { result: toRemoteObject(value, session, byValue) }
     } catch (e) {

@@ -422,35 +422,167 @@ export class CDPDriver implements ProtocolDriver {
   }
 
   async elementGetAttribute(
-    _s: string,
-    _e: ElementRef,
-    _a: string
+    sessionId: string,
+    elementId: ElementRef,
+    attribute: string
   ): Promise<string> {
-    throw notImpl('elementGetAttribute')
+    return this._callOnElement<string>(
+      sessionId,
+      elementId,
+      `function(name) { var v = this.getAttribute(name); return v == null ? null : String(v) }`,
+      [{ value: attribute }]
+    )
   }
-  async elementGetProperty(_s: string, _e: ElementRef, _p: string): Promise<any> {
-    throw notImpl('elementGetProperty')
+
+  async elementGetProperty(
+    sessionId: string,
+    elementId: ElementRef,
+    property: string
+  ): Promise<any> {
+    return this._callOnElement<any>(
+      sessionId,
+      elementId,
+      `function(name) { return this[name] }`,
+      [{ value: property }]
+    )
   }
-  async elementGetCss(_s: string, _e: ElementRef, _p: string): Promise<string> {
-    throw notImpl('elementGetCss')
+
+  async elementGetCss(
+    sessionId: string,
+    elementId: ElementRef,
+    cssProperty: string
+  ): Promise<string> {
+    return this._callOnElement<string>(
+      sessionId,
+      elementId,
+      `function(prop) {
+        var s = window.getComputedStyle(this);
+        return s.getPropertyValue ? s.getPropertyValue(prop) : (s[prop] || '');
+      }`,
+      [{ value: cssProperty }]
+    )
   }
-  async elementGetText(_s: string, _e: ElementRef): Promise<string> {
-    throw notImpl('elementGetText')
+
+  async elementGetText(sessionId: string, elementId: ElementRef): Promise<string> {
+    return this._callOnElement<string>(
+      sessionId,
+      elementId,
+      `function() { return (this.innerText != null ? this.innerText : this.textContent) || '' }`,
+      []
+    )
   }
-  async elementGetTagName(_s: string, _e: ElementRef): Promise<string> {
-    throw notImpl('elementGetTagName')
+
+  async elementGetTagName(sessionId: string, elementId: ElementRef): Promise<string> {
+    const name = await this._callOnElement<string>(
+      sessionId,
+      elementId,
+      `function() { return (this.tagName || '').toString() }`,
+      []
+    )
+    return name.toLowerCase()
   }
-  async elementGetRect(_s: string, _e: ElementRef): Promise<WindowRect> {
-    throw notImpl('elementGetRect')
+
+  async elementGetRect(
+    sessionId: string,
+    elementId: ElementRef
+  ): Promise<WindowRect> {
+    return this._callOnElement<WindowRect>(
+      sessionId,
+      elementId,
+      `function() {
+        var r = this.getBoundingClientRect();
+        return { x: r.x || r.left, y: r.y || r.top, width: r.width, height: r.height };
+      }`,
+      []
+    )
   }
-  async elementIsEnabled(_s: string, _e: ElementRef): Promise<boolean> {
-    throw notImpl('elementIsEnabled')
+
+  async elementIsEnabled(sessionId: string, elementId: ElementRef): Promise<boolean> {
+    return this._callOnElement<boolean>(
+      sessionId,
+      elementId,
+      `function() { return !this.disabled }`,
+      []
+    )
   }
-  async elementIsSelected(_s: string, _e: ElementRef): Promise<boolean> {
-    throw notImpl('elementIsSelected')
+
+  async elementIsSelected(sessionId: string, elementId: ElementRef): Promise<boolean> {
+    return this._callOnElement<boolean>(
+      sessionId,
+      elementId,
+      `function() { return !!(this.selected || this.checked) }`,
+      []
+    )
   }
-  async elementScreenshot(_s: string, _e: ElementRef): Promise<string> {
-    throw notImpl('elementScreenshot')
+
+  async elementScreenshot(
+    sessionId: string,
+    elementId: ElementRef
+  ): Promise<string> {
+    const session = this._requireSession(sessionId)
+    const scope = this._resolveElement(session, elementId)
+    const rect = await this._callOnElement<{
+      x: number
+      y: number
+      width: number
+      height: number
+    }>(
+      sessionId,
+      elementId,
+      `function() {
+        if (this.scrollIntoView) this.scrollIntoView();
+        var r = this.getBoundingClientRect();
+        return { x: r.x || r.left, y: r.y || r.top, width: r.width, height: r.height };
+      }`,
+      []
+    )
+    const res = await session.client.send<{ data: string }>(
+      'Page.captureScreenshot',
+      {
+        clip: {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+          scale: 1
+        },
+        captureBeyondViewport: true
+      },
+      session.cdpSessionId
+    )
+    void scope // scope is implied by the above callFunctionOn
+    return res.data
+  }
+
+  private async _callOnElement<T>(
+    sessionId: string,
+    elementId: ElementRef,
+    functionDeclaration: string,
+    args: Array<{ value?: unknown; objectId?: string }>
+  ): Promise<T> {
+    const session = this._requireSession(sessionId)
+    const scope = this._resolveElement(session, elementId)
+    const res = await session.client.send<{
+      result: { value?: T; objectId?: string; type?: string }
+      exceptionDetails?: { text: string; exception?: { description?: string } }
+    }>(
+      'Runtime.callFunctionOn',
+      {
+        functionDeclaration,
+        objectId: scope.objectId,
+        arguments: args,
+        returnByValue: true
+      },
+      session.cdpSessionId
+    )
+    if (res.exceptionDetails) {
+      throw new Error(
+        `Element call failed: ${
+          res.exceptionDetails.exception?.description ?? res.exceptionDetails.text
+        }`
+      )
+    }
+    return res.result.value as T
   }
 
   async executeSync(sessionId: string, script: string, args: any[]): Promise<any> {

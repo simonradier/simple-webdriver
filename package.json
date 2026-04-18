@@ -1,6 +1,6 @@
 {
   "name": "@critik/simple-webdriver",
-  "version": "0.4.0-dev1",
+  "version": "0.9.0-dev1",
   "description": "Javascript webdriver bindings with no dependency",
   "keywords": [
     "webdriver",
@@ -18,7 +18,7 @@
   },
   "scripts": {
     "prepublishOnly": "tsc",
-    "test": "c8 --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test": "c8 --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 --import=tsx/esm --file test/unit-setup.ts 'test/unit/*test.ts'",
     "test-wd-chrome": "NOCK_OFF=true mocha --retries 2 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
     "test-wd-safari": "NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
     "test-wd-edge": "NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",

@@ -4,3 +4,24 @@ export class CDPNotImplementedError extends Error {
     this.name = 'CDPNotImplementedError'
   }
 }
+
+export class CDPConnectionError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'CDPConnectionError'
+  }
+}
+
+export class CDPProtocolError extends Error {
+  public readonly method: string
+  public readonly code: number
+  public readonly data?: unknown
+
+  constructor(method: string, code: number, message: string, data?: unknown) {
+    super(`CDP ${method} failed: ${message} (code ${code})`)
+    this.name = 'CDPProtocolError'
+    this.method = method
+    this.code = code
+    this.data = data
+  }
+}

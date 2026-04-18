@@ -45,6 +45,7 @@
     "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.6.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
     "c8": "^11.0.0",
@@ -58,6 +59,7 @@
     "nock": "^14.0.4",
     "prettier": "^3.5.3",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "ws": "^8.20.0"
   }
 }

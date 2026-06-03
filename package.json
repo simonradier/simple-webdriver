@@ -1,6 +1,6 @@
 {
   "name": "@critik/simple-webdriver",
-  "version": "0.4.0-dev1",
+  "version": "0.9.0-dev1",
   "description": "Javascript webdriver bindings with no dependency",
   "keywords": [
     "webdriver",
@@ -18,11 +18,14 @@
   },
   "scripts": {
     "prepublishOnly": "tsc",
-    "test": "c8 --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 --import=tsx/esm 'test/unit/*test.ts'",
-    "test-wd-chrome": "NOCK_OFF=true mocha --retries 2 --grep '^.*Chrome(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
-    "test-wd-safari": "NOCK_OFF=true mocha --retries 2 --grep '^.*Safari(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
-    "test-wd-edge": "NOCK_OFF=true mocha --retries 2 --grep '^.*Edge(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
-    "test-wd-firefox": "NOCK_OFF=true mocha --retries 2 --grep '^.*Firefox(?!.*Nock Only).*$' --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test": "c8 --reporter=lcov --reporter=text mocha --retry 1 --timeout 3000 --import=tsx/esm --file test/unit-setup.ts 'test/unit/*test.ts'",
+    "test-wd-chrome": "cross-env NOCK_OFF=true mocha --retries 2 --grep \"^.*Chrome(?!.*Nock Only).*$\" --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test-wd-safari": "cross-env NOCK_OFF=true mocha --retries 2 --grep \"^.*Safari(?!.*Nock Only).*$\" --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test-wd-edge": "cross-env NOCK_OFF=true mocha --retries 2 --grep \"^.*Edge(?!.*Nock Only).*$\" --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test-wd-firefox": "cross-env NOCK_OFF=true mocha --retries 2 --grep \"^.*Firefox(?!.*Nock Only).*$\" --timeout 30000 --import=tsx/esm 'test/unit/*test.ts'",
+    "test-cdp-chrome": "cross-env CDP_BROWSER=chrome mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
+    "test-cdp-edge": "cross-env CDP_BROWSER=msedge mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
+    "test-cdp-chromium": "cross-env CDP_BROWSER=chromium mocha --timeout 60000 --import=tsx/esm 'test/integration/cdp-chrome.test.ts'",
     "coverage": "c8 report --reporter=text-lcov | coveralls",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write ."
@@ -45,6 +48,7 @@
     "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.6.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
     "c8": "^11.0.0",
@@ -52,12 +56,14 @@
     "chai-as-promised": "^8.0.1",
     "chromedriver": "^147.0.2",
     "coveralls": "^3.1.1",
+    "cross-env": "^10.1.0",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",
     "mocha": "^11.2.2",
     "nock": "^14.0.4",
     "prettier": "^3.5.3",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.0"
+    "typescript": "^6.0.0",
+    "ws": "^8.20.0"
   }
 }

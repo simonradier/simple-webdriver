@@ -13,6 +13,8 @@ import {
   WebDriverError,
   WebDriverResponseError
 } from './swd.js'
+import type { CDPBrowser, CDPOptions } from './cdp/options.js'
+import { CDPNotImplementedError } from './cdp/errors.js'
 
 export {
   WebDriver,
@@ -27,5 +29,7 @@ export {
   BrowserType,
   LocationError,
   WebDriverError,
-  WebDriverResponseError
+  WebDriverResponseError,
+  CDPNotImplementedError
 }
+export type { CDPOptions, CDPBrowser }

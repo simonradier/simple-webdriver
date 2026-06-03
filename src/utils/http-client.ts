@@ -3,10 +3,17 @@ import { createRequire } from 'module'
 import type * as httpTypes from 'http'
 import type * as httpsTypes from 'https'
 
-// Use createRequire to load http/https as CJS modules.
-// This ensures the returned objects are mutable, allowing
-// test libraries like nock to intercept requests.
-const require = createRequire(import.meta.url)
+// We need http/https loaded via CJS require so that interception
+// libraries (nock & co) can swap out the module's exports. Using
+// `import * as http from 'http'` returns a frozen namespace object
+// that those libraries cannot patch, and `await import('http')`
+// suffers from the same restriction in ESM.
+//
+// `createRequire` needs an anchor that resolves to an existing path —
+// it does NOT need to be the file requesting the require. We use
+// `process.execPath` so that bundlers like esbuild that stub
+// `import.meta.url` as an empty object can't trip us up.
+const require = createRequire(process.execPath)
 const http = require('http') as typeof httpTypes
 const https = require('https') as typeof httpsTypes
 

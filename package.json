@@ -1,6 +1,6 @@
 {
   "name": "@critik/simple-webdriver",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Javascript webdriver bindings with no dependency",
   "keywords": [
     "webdriver",

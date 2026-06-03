@@ -54,7 +54,7 @@
     "c8": "^11.0.0",
     "chai": "^6.2.2",
     "chai-as-promised": "^8.0.1",
-    "chromedriver": "^147.0.2",
+    "chromedriver": "^149.0.1",
     "coveralls": "^3.1.1",
     "cross-env": "^10.1.0",
     "eslint": "^10.2.0",
